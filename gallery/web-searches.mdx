@@ -1,0 +1,280 @@
+---
+title: "Web Searches"
+description: "Quick search shortcuts for websites, documentation, and online services"
+icon: "magnifying-glass"
+---
+
+Web search scripts let you search websites and services directly from Raycast without opening a browser first. Type your query, press Enter, and jump straight to the results.
+
+## How Web Searches Work
+
+Web search scripts typically:
+1. Accept a search query as an argument
+2. URL-encode the query
+3. Open the search URL in your default browser
+
+```bash Example Web Search
+#!/bin/bash
+
+# @raycast.schemaVersion 1
+# @raycast.title Search Google
+# @raycast.mode silent
+# @raycast.icon 🔍
+# @raycast.argument1 { "type": "text", "placeholder": "query", "percentEncoded": true }
+
+open "https://www.google.com/search?q=$1"
+```
+
+## Available Search Categories
+
+<CardGroup cols={2}>
+  <Card title="Search Engines" icon="magnifying-glass" href="https://github.com/raycast/script-commands/tree/master/commands/web-searches">
+    - Google
+    - DuckDuckGo
+    - Bing
+    - Brave Search
+    - Ecosia
+  </Card>
+  
+  <Card title="Developer Documentation" icon="book" href="https://github.com/raycast/script-commands/tree/master/commands/web-searches">
+    - MDN Web Docs
+    - Stack Overflow
+    - GitHub
+    - npm packages
+    - Python docs
+    - DevDocs
+  </Card>
+  
+  <Card title="Code Search" icon="code" href="https://github.com/raycast/script-commands/tree/master/commands/web-searches">
+    - GitHub code search
+    - Sourcegraph
+    - Grep.app
+    - SearchCode
+  </Card>
+  
+  <Card title="Package Managers" icon="box" href="https://github.com/raycast/script-commands/tree/master/commands/web-searches">
+    - npm
+    - PyPI
+    - RubyGems
+    - Homebrew
+    - Cargo (Rust)
+    - Maven
+  </Card>
+  
+  <Card title="Shopping" icon="cart-shopping" href="https://github.com/raycast/script-commands/tree/master/commands/web-searches">
+    - Amazon
+    - eBay
+    - AliExpress
+    - Product Hunt
+  </Card>
+  
+  <Card title="Media & Entertainment" icon="film" href="https://github.com/raycast/script-commands/tree/master/commands/web-searches">
+    - YouTube
+    - Netflix
+    - IMDb
+    - Spotify
+    - SoundCloud
+  </Card>
+  
+  <Card title="Social Media" icon="hashtag" href="https://github.com/raycast/script-commands/tree/master/commands/web-searches">
+    - Twitter/X
+    - Reddit
+    - LinkedIn
+    - Hacker News
+  </Card>
+  
+  <Card title="Maps & Travel" icon="map" href="https://github.com/raycast/script-commands/tree/master/commands/web-searches">
+    - Google Maps
+    - Apple Maps
+    - Flights
+    - Hotels
+    - Restaurants
+  </Card>
+  
+  <Card title="Translation" icon="language" href="https://github.com/raycast/script-commands/tree/master/commands/web-searches">
+    - Google Translate
+    - DeepL
+    - Linguee
+  </Card>
+  
+  <Card title="Images" icon="image" href="https://github.com/raycast/script-commands/tree/master/commands/web-searches">
+    - Google Images
+    - Unsplash
+    - Pexels
+    - Giphy (GIFs)
+  </Card>
+  
+  <Card title="Reference & Learning" icon="graduation-cap" href="https://github.com/raycast/script-commands/tree/master/commands/web-searches">
+    - Wikipedia
+    - Wolfram Alpha
+    - Dictionary
+    - Thesaurus
+  </Card>
+  
+  <Card title="News" icon="newspaper" href="https://github.com/raycast/script-commands/tree/master/commands/web-searches">
+    - Google News
+    - Hacker News
+    - Reddit
+    - Tech news sites
+  </Card>
+</CardGroup>
+
+## Creating Search Scripts
+
+### Basic Search Script
+
+```bash
+#!/bin/bash
+
+# @raycast.schemaVersion 1
+# @raycast.title Search Site
+# @raycast.mode silent
+# @raycast.packageName Web Searches
+# @raycast.icon 🔍
+# @raycast.argument1 { "type": "text", "placeholder": "search query", "percentEncoded": true }
+
+open "https://example.com/search?q=$1"
+```
+
+### Multi-Parameter Search
+
+```bash
+#!/bin/bash
+
+# @raycast.schemaVersion 1
+# @raycast.title Search Flights
+# @raycast.mode silent
+# @raycast.icon ✈️
+# @raycast.argument1 { "type": "text", "placeholder": "from", "percentEncoded": true }
+# @raycast.argument2 { "type": "text", "placeholder": "to", "percentEncoded": true }
+
+open "https://www.google.com/flights?hl=en#flt=/m/$1./m/$2"
+```
+
+### Search with Dropdown Options
+
+```bash
+#!/bin/bash
+
+# @raycast.schemaVersion 1
+# @raycast.title Search Documentation
+# @raycast.mode silent
+# @raycast.icon 📚
+# @raycast.argument1 { "type": "dropdown", "placeholder": "Site", "data": [{"title": "MDN", "value": "mdn"}, {"title": "React", "value": "react"}] }
+# @raycast.argument2 { "type": "text", "placeholder": "query", "percentEncoded": true }
+
+case $1 in
+  "mdn")
+    open "https://developer.mozilla.org/en-US/search?q=$2"
+    ;;
+  "react")
+    open "https://react.dev/?search=$2"
+    ;;
+esac
+```
+
+## Common Search Patterns
+
+<AccordionGroup>
+  <Accordion title="Google Search Operators">
+    Create scripts for advanced Google searches:
+    
+    ```bash
+    # Search within a specific site
+    open "https://www.google.com/search?q=site:github.com+$1"
+    
+    # Search for file types
+    open "https://www.google.com/search?q=$1+filetype:pdf"
+    
+    # Search with time filters
+    open "https://www.google.com/search?q=$1&tbs=qdr:d"  # Past day
+    ```
+  </Accordion>
+  
+  <Accordion title="Developer Searches">
+    ```bash
+    # Search Stack Overflow
+    open "https://stackoverflow.com/search?q=$1"
+    
+    # Search GitHub issues
+    open "https://github.com/search?type=issues&q=$1"
+    
+    # Search npm packages
+    open "https://www.npmjs.com/search?q=$1"
+    ```
+  </Accordion>
+  
+  <Accordion title="Shopping Searches">
+    ```bash
+    # Amazon product search
+    open "https://www.amazon.com/s?k=$1"
+    
+    # eBay search
+    open "https://www.ebay.com/sch/i.html?_nkw=$1"
+    
+    # Price comparison
+    open "https://www.google.com/search?tbm=shop&q=$1"
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Tips for Better Search Scripts
+
+<Steps>
+  <Step title="Use percentEncoded for Arguments">
+    Enable URL encoding in your argument definition:
+    
+    ```bash
+    # @raycast.argument1 { "type": "text", "placeholder": "query", "percentEncoded": true }
+    ```
+    
+    This automatically handles special characters and spaces.
+  </Step>
+  
+  <Step title="Group Related Searches">
+    Use packageName to organize searches:
+    
+    ```bash
+    # @raycast.packageName Developer Searches
+    ```
+  </Step>
+  
+  <Step title="Choose Clear Icons">
+    Use recognizable icons for quick identification:
+    - 🔍 for general search
+    - 📚 for documentation
+    - 🛒 for shopping
+    - 🗺️ for maps
+    - Or use brand emojis/icons
+  </Step>
+  
+  <Step title="Make Titles Descriptive">
+    Include the site name in the title:
+    
+    ```bash
+    # @raycast.title Search Stack Overflow
+    ```
+    
+    Not just "Search" - be specific!
+  </Step>
+</Steps>
+
+## Performance Note
+
+<Note>
+  Web search scripts use `silent` mode and execute instantly. The browser opens with your search results without any intermediate steps.
+</Note>
+
+## Related Categories
+
+<CardGroup cols={2}>
+  <Card title="Browsing" icon="globe" href="/gallery/browsing">
+    Browser controls and web utilities
+  </Card>
+  <Card title="Navigation" icon="compass" href="/gallery/navigation">
+    Website bookmarks and quick links
+  </Card>
+  <Card title="Developer Utils" icon="code" href="/gallery/developer-utils">
+    Developer tools and documentation
+  </Card>
+</CardGroup>

@@ -1,0 +1,230 @@
+---
+title: "Navigation & Shortcuts"
+description: "Quick navigation helpers and bookmarks for files, folders, and websites"
+icon: "compass"
+---
+
+Navigation scripts help you quickly jump to frequently-used locations, whether they're files, folders, websites, or applications. These scripts eliminate the need to browse through Finder or bookmarks.
+
+## Available Navigation Scripts
+
+<CardGroup cols={2}>
+  <Card title="File & Folder Navigation" icon="folder" href="https://github.com/raycast/script-commands/tree/master/commands/navigation">
+    Quickly open common directories:
+    - Home folder
+    - Downloads
+    - Documents
+    - Desktop
+    - Applications
+    - Development projects
+    - Custom locations
+  </Card>
+  
+  <Card title="Website Bookmarks" icon="bookmark" href="https://github.com/raycast/script-commands/tree/master/commands/navigation">
+    Open frequently-visited websites:
+    - Development tools
+    - Admin panels
+    - Documentation sites
+    - Cloud services
+    - Social media
+  </Card>
+  
+  <Card title="Application Launchers" icon="rocket" href="https://github.com/raycast/script-commands/tree/master/commands/navigation">
+    Launch apps with specific configurations:
+    - Open app in specific workspace
+    - Launch with command-line flags
+    - Open app with specific files
+  </Card>
+  
+  <Card title="Recent Items" icon="clock-rotate-left" href="https://github.com/raycast/script-commands/tree/master/commands/navigation">
+    Access recent files and locations:
+    - Recently opened files
+    - Recently visited folders
+    - Recently used apps
+  </Card>
+</CardGroup>
+
+## Common Use Cases
+
+<AccordionGroup>
+  <Accordion title="Development Navigation">
+    ```bash
+    #!/bin/bash
+    
+    # @raycast.schemaVersion 1
+    # @raycast.title Open Project Directory
+    # @raycast.mode silent
+    # @raycast.icon 💻
+    
+    open ~/Development/current-project
+    ```
+    
+    Quick access to:
+    - Project directories
+    - Git repositories
+    - Configuration files
+    - Log directories
+  </Accordion>
+  
+  <Accordion title="Web Navigation">
+    ```bash
+    #!/bin/bash
+    
+    # @raycast.schemaVersion 1
+    # @raycast.title Open Admin Dashboard
+    # @raycast.mode silent
+    # @raycast.icon 🌐
+    
+    open "https://admin.example.com/dashboard"
+    ```
+    
+    Bookmarks for:
+    - Admin panels
+    - Analytics dashboards
+    - Cloud consoles (AWS, GCP, Azure)
+    - Development tools
+  </Accordion>
+  
+  <Accordion title="Workspace Navigation">
+    Open specific Finder locations with custom views:
+    ```bash
+    #!/bin/bash
+    
+    # @raycast.schemaVersion 1
+    # @raycast.title Downloads Folder
+    # @raycast.mode silent
+    # @raycast.icon 📥
+    
+    open ~/Downloads
+    ```
+  </Accordion>
+  
+  <Accordion title="Network Locations">
+    ```bash
+    #!/bin/bash
+    
+    # @raycast.schemaVersion 1
+    # @raycast.title Connect to Server
+    # @raycast.mode silent
+    # @raycast.icon 🖥️
+    
+    open "smb://server.local/share"
+    ```
+    
+    Quick access to:
+    - Network drives
+    - SMB shares
+    - FTP servers
+    - Cloud storage
+  </Accordion>
+</AccordionGroup>
+
+## Creating Navigation Scripts
+
+<Steps>
+  <Step title="Identify Your Frequent Destinations">
+    Make a list of files, folders, and websites you access multiple times daily.
+  </Step>
+  
+  <Step title="Create Simple Scripts">
+    Most navigation scripts are just one line:
+    
+    ```bash
+    open /path/to/location
+    ```
+    
+    or
+    
+    ```bash
+    open "https://example.com"
+    ```
+  </Step>
+  
+  <Step title="Add Descriptive Metadata">
+    Use clear titles and appropriate icons:
+    
+    ```bash
+    # @raycast.title Open Downloads
+    # @raycast.icon 📥
+    ```
+  </Step>
+  
+  <Step title="Organize by Package">
+    Group related navigation scripts:
+    
+    ```bash
+    # @raycast.packageName Work Projects
+    ```
+    
+    or
+    
+    ```bash
+    # @raycast.packageName Web Bookmarks
+    ```
+  </Step>
+</Steps>
+
+## Advanced Navigation
+
+### Context-Aware Navigation
+
+Open different locations based on time or conditions:
+
+```bash
+#!/bin/bash
+
+# @raycast.schemaVersion 1
+# @raycast.title Open Work Folder
+# @raycast.mode silent
+
+hour=$(date +%H)
+
+if [ $hour -ge 9 ] && [ $hour -lt 17 ]; then
+  open ~/Work/current-sprint
+else
+  open ~/Personal/projects
+fi
+```
+
+### Navigation with Arguments
+
+Create parameterized navigation:
+
+```bash
+#!/bin/bash
+
+# @raycast.schemaVersion 1
+# @raycast.title Open GitHub Repo
+# @raycast.mode silent
+# @raycast.argument1 { "type": "text", "placeholder": "username/repo" }
+
+open "https://github.com/$1"
+```
+
+## Tips
+
+<Tip>
+  Combine navigation scripts with `packageName` to create organized bookmark categories like "Development", "Work Sites", or "Personal".
+</Tip>
+
+<Note>
+  Use the `silent` mode for navigation scripts - they execute instantly without showing output.
+</Note>
+
+<Warning>
+  For network locations that require authentication, consider security implications before storing credentials in scripts.
+</Warning>
+
+## Related Categories
+
+<CardGroup cols={2}>
+  <Card title="System Utilities" icon="computer" href="/gallery/system">
+    System navigation and file management
+  </Card>
+  <Card title="Browsing" icon="globe" href="/gallery/browsing">
+    Web browsing utilities and shortcuts
+  </Card>
+  <Card title="Apps" icon="grid" href="/gallery/apps">
+    Application integrations and controls
+  </Card>
+</CardGroup>

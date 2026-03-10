@@ -79,7 +79,11 @@
               "gallery/media",
               "gallery/productivity",
               "gallery/communication",
-              "gallery/browsing"
+              "gallery/browsing",
+              "gallery/conversions",
+              "gallery/dashboards",
+              "gallery/navigation",
+              "gallery/web-searches"
             ]
           }
         ]

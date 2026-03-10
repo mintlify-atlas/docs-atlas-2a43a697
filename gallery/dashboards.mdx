@@ -1,0 +1,159 @@
+---
+title: "Dashboard & Inline Scripts"
+description: "Live-updating dashboard widgets and inline information displays"
+icon: "gauge"
+---
+
+Dashboard scripts use Raycast's inline mode to display live information directly in your command list. These scripts refresh automatically and provide at-a-glance status updates without opening separate windows.
+
+## What are Dashboard Scripts?
+
+Dashboard scripts use the `inline` mode and `refreshTime` parameter to:
+- Display information directly in Raycast's command list
+- Auto-refresh at specified intervals (10s, 1m, 12h, 1d)
+- Show live status without executing the script manually
+- Pin to favorites for always-visible widgets
+
+<Info>
+  Learn more about inline mode in the [Output Modes documentation](/creating/output-modes).
+</Info>
+
+## Available Dashboard Scripts
+
+<CardGroup cols={2}>
+  <Card title="System Monitoring" icon="computer" href="https://github.com/raycast/script-commands/tree/master/commands/dashboard">
+    - CPU usage
+    - Memory usage
+    - Battery status
+    - Disk space
+    - Network status
+    - Temperature sensors
+  </Card>
+  
+  <Card title="Time & Calendar" icon="calendar" href="https://github.com/raycast/script-commands/tree/master/commands/dashboard">
+    - Current time in multiple time zones
+    - Countdown timers
+    - Upcoming calendar events
+    - Days until/since dates
+  </Card>
+  
+  <Card title="Weather" icon="cloud" href="https://github.com/raycast/script-commands/tree/master/commands/dashboard">
+    - Current weather conditions
+    - Temperature and humidity
+    - Weather forecasts
+    - Weather alerts
+  </Card>
+  
+  <Card title="Cryptocurrency" icon="bitcoin" href="https://github.com/raycast/script-commands/tree/master/commands/dashboard">
+    - Crypto prices
+    - Portfolio values
+    - Price change indicators
+    - Market caps
+  </Card>
+  
+  <Card title="Stock Prices" icon="chart-line" href="https://github.com/raycast/script-commands/tree/master/commands/dashboard">
+    - Live stock quotes
+    - Market indices
+    - Portfolio tracking
+    - Price alerts
+  </Card>
+  
+  <Card title="API Monitoring" icon="server" href="https://github.com/raycast/script-commands/tree/master/commands/dashboard">
+    - Service status
+    - API health checks
+    - Uptime monitoring
+    - Response times
+  </Card>
+  
+  <Card title="Metrics & Analytics" icon="chart-bar" href="https://github.com/raycast/script-commands/tree/master/commands/dashboard">
+    - Business metrics (ARR, MRR, ARPU)
+    - Website analytics
+    - Performance indicators
+    - Custom KPIs
+  </Card>
+  
+  <Card title="Developer Stats" icon="code" href="https://github.com/raycast/script-commands/tree/master/commands/dashboard">
+    - GitHub stats
+    - CI/CD status
+    - Deployment status
+    - Build health
+  </Card>
+</CardGroup>
+
+## Creating Dashboard Scripts
+
+A dashboard script requires:
+
+1. **Inline mode** - Display output in the command list
+2. **Refresh time** - Auto-update interval
+3. **Brief output** - First line is displayed
+
+```bash Example Dashboard Script
+#!/bin/bash
+
+# @raycast.schemaVersion 1
+# @raycast.title Current Time
+# @raycast.mode inline
+# @raycast.refreshTime 1s
+# @raycast.packageName Dashboard
+
+# @raycast.icon 🕐
+
+date "+%H:%M:%S"
+```
+
+<Warning>
+  Only the first 10 inline scripts will auto-refresh. The rest must be manually refreshed by navigating to them and pressing return.
+</Warning>
+
+## Best Practices
+
+<Steps>
+  <Step title="Keep Output Brief">
+    Only the first line is displayed in inline mode. Keep it concise and informative.
+  </Step>
+  
+  <Step title="Choose Appropriate Refresh Intervals">
+    Balance freshness with performance. Use longer intervals for less time-sensitive data.
+  </Step>
+  
+  <Step title="Handle API Failures Gracefully">
+    Display fallback text or cached values when external APIs are unavailable.
+  </Step>
+  
+  <Step title="Use Color for Status">
+    Leverage ANSI color codes to indicate status (green for good, red for alerts).
+  </Step>
+  
+  <Step title="Pin to Favorites">
+    Use Raycast's favorites feature (Cmd+K) to keep important dashboards visible.
+  </Step>
+</Steps>
+
+## Performance Considerations
+
+<Accordion title="Refresh Time Guidelines">
+  - **10-30s**: System metrics (CPU, memory)
+  - **1-5m**: Weather, stock prices
+  - **10-30m**: Analytics, metrics dashboards
+  - **1-6h**: Less critical monitoring
+  - **12-24h**: Daily summaries, reports
+</Accordion>
+
+<Accordion title="Caching Strategies">
+  For scripts calling external APIs:
+  - Cache responses to reduce API calls
+  - Use the refresh time to control cache expiry
+  - Store cache in `/tmp` or `~/.cache`
+</Accordion>
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="Output Modes" icon="display" href="/creating/output-modes">
+    Learn more about inline mode and ANSI colors
+  </Card>
+  <Card title="System Scripts" icon="computer" href="/gallery/system">
+    System monitoring and status scripts
+  </Card>
+</CardGroup>
