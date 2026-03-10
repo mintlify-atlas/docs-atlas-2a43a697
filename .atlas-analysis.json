@@ -1,0 +1,98 @@
+{
+  "projectType": "general",
+  "projectName": "Raycast Script Commands",
+  "projectDescription": "A collection of script commands that extend Raycast to speed up everyday tasks and workflows.",
+  "theme": "palm",
+  "primaryColor": "#9da8eb",
+  "lightColor": "#646c94",
+  "darkColor": "#27262c",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Creating Script Commands",
+            "pages": [
+              "creating/basics",
+              "creating/metadata",
+              "creating/output-modes",
+              "creating/arguments",
+              "creating/templates"
+            ]
+          },
+          {
+            "group": "Script Examples",
+            "pages": [
+              "examples/system",
+              "examples/developer-utils",
+              "examples/apps",
+              "examples/media",
+              "examples/productivity"
+            ]
+          },
+          {
+            "group": "Guidelines",
+            "pages": [
+              "guidelines/contributing",
+              "guidelines/best-practices",
+              "guidelines/troubleshooting"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Script Gallery",
+        "groups": [
+          {
+            "group": "Categories",
+            "pages": [
+              "gallery/overview",
+              "gallery/apps",
+              "gallery/system",
+              "gallery/developer-utils",
+              "gallery/media",
+              "gallery/productivity",
+              "gallery/communication",
+              "gallery/browsing"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Execute custom scripts from anywhere with keyboard shortcuts",
+    "Support for Shell, AppleScript, Python, Swift, and JavaScript",
+    "Metadata-driven configuration for script appearance and behavior",
+    "Multiple output modes: silent, compact, fullOutput, and inline",
+    "Custom arguments for dynamic script execution",
+    "ANSI color support for rich terminal output",
+    "Community-driven repository with hundreds of example scripts",
+    "Template system for quick script creation"
+  ],
+  "publicApiSurface": [
+    "@raycast.schemaVersion - Schema version metadata",
+    "@raycast.title - Script command display name",
+    "@raycast.mode - Output mode (silent, compact, fullOutput, inline)",
+    "@raycast.packageName - Package display name",
+    "@raycast.icon - Icon for the command",
+    "@raycast.iconDark - Dark mode icon",
+    "@raycast.currentDirectoryPath - Script execution path",
+    "@raycast.needsConfirmation - Confirmation dialog flag",
+    "@raycast.refreshTime - Auto-refresh interval for inline mode",
+    "@raycast.argument1 - First custom argument",
+    "@raycast.argument2 - Second custom argument",
+    "@raycast.argument3 - Third custom argument",
+    "@raycast.author - Script author name",
+    "@raycast.authorURL - Author contact URL",
+    "@raycast.description - Script description"
+  ]
+}
