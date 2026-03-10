@@ -1,0 +1,418 @@
+---
+title: System Scripts
+description: Examples of system monitoring and control scripts for macOS
+icon: 'computer'
+---
+
+These examples demonstrate how to create script commands that interact with macOS system features like battery monitoring, network information, power management, audio controls, disk usage, and screenshots.
+
+## Battery Information
+
+Monitor your Mac's battery status including charge level, time remaining, cycle count, and charger wattage.
+
+<Accordion title="battery-info.sh - Comprehensive Battery Monitoring">
+
+This script displays detailed battery information in Raycast's menu bar, automatically refreshing every 3 minutes.
+
+```bash
+#!/bin/bash
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Battery Info
+# @raycast.mode inline
+# @raycast.refreshTime 3m
+# @raycast.packageName System
+# @raycast.icon 🔋
+# @raycast.description Get Battery percentage, time remaining, charge status, charger wattage, total cycles etc.
+
+BATT_PERCENTAGE=$(pmset -g batt | grep "InternalBattery-0" |  awk '{print $3}')
+CHARGE_STATUS=$(pmset -g batt | grep "InternalBattery-0" |  awk '{print $4}')
+TIME_REMAINING=$(pmset -g batt | grep "InternalBattery-0" |  awk '{print $5}')
+CYCLE_COUNT=$(system_profiler SPPowerDataType | grep "Cycle Count" | awk '{print $3}')
+CHARGE_WATT=$(pmset -g ac | grep "Wattage" | awk '{print $3}')
+
+BATT=${BATT_PERCENTAGE%??}
+
+if [[ "$CHARGE_STATUS" == "charging;" ]]; then
+    if [[ "$TIME_REMAINING" == "(no" ]]; then
+        TO_SHOW="⚡${BATT}% - No Estimation Yet (Charging at ${CHARGE_WATT}) - ${CYCLE_COUNT} Cycles"
+        echo $TO_SHOW
+    else
+        RE_MIN=${TIME_REMAINING##*:}
+        RE_HOUR=${TIME_REMAINING%%:*}
+        if [[ "$RE_HOUR" == "0" ]]; then
+            TIME_REMAINING_FORMATTED="${RE_MIN}m"
+        else
+            TIME_REMAINING_FORMATTED="${RE_HOUR}h ${RE_MIN}m"
+        fi
+        TO_SHOW="⚡${BATT}% - ${TIME_REMAINING_FORMATTED} to Full (Charging at ${CHARGE_WATT}) - ${CYCLE_COUNT} Cycles"
+        echo $TO_SHOW
+    fi
+elif [[ "$CHARGE_STATUS" == "discharging;" ]]; then
+    if [[ "$TIME_REMAINING" != "(no" ]]; then
+        RE_MIN=${TIME_REMAINING##*:}
+        RE_HOUR=${TIME_REMAINING%%:*}
+        if [[ "$RE_HOUR" == "0" ]]; then
+            TIME_REMAINING_FORMATTED="${RE_MIN}m"
+        else
+            TIME_REMAINING_FORMATTED="${RE_HOUR}h ${RE_MIN}m"
+        fi
+    fi
+    TO_SHOW="${BATT}% - ${TIME_REMAINING_FORMATTED} Remaining - ${CYCLE_COUNT} Cycles"
+    echo $TO_SHOW
+fi
+```
+
+**How it works:**
+- Uses `pmset -g batt` to get current battery status
+- Uses `system_profiler SPPowerDataType` to retrieve battery cycle count
+- Formats output differently based on charging state (charging, discharging, charged)
+- Displays time remaining in human-readable format (hours and minutes)
+- Shows charger wattage when connected to power
+
+</Accordion>
+
+## Network Information
+
+Get your current IP address, ISP, and location information.
+
+<Accordion title="Network Info.sh - Display Network Details">
+
+This Python script fetches your public IP address and location data from an external API.
+
+```python
+#!/usr/bin/env python3
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Network Info
+# @raycast.mode fullOutput
+# @raycast.icon 🛜
+
+import urllib.request, json 
+with urllib.request.urlopen("http://ip-api.com/json") as url:
+    data = json.load(url)
+
+    print("IP address:", data["query"])
+    print("ISP:", data["isp"])
+    print("City:", data["city"])
+    print("Region:", data["regionName"])
+    print("Country:", data["country"])
+    print("ZIP:", data["zip"])
+```
+
+**How it works:**
+- Makes HTTP request to ip-api.com to get network information
+- Parses JSON response containing IP, ISP, and geolocation data
+- Displays formatted output in Raycast
+
+</Accordion>
+
+## Power Management
+
+Control your Mac's power settings including caffeinate mode and low power mode.
+
+<Accordion title="caffeinate-enable.sh - Prevent Mac from Sleeping">
+
+Keep your Mac awake for a specified duration.
+
+```bash
+#!/bin/bash
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Enable Caffeinate
+# @raycast.mode silent
+# @raycast.packageName System
+# @raycast.icon ☕️
+# @raycast.argument1 { "type": "text", "placeholder": "Time", "percentEncoded": true, "optional": true }
+# @raycast.description Starts a caffeinated session
+
+if [ -z "$1" ]
+then
+    killall caffeinate
+    caffeinate -t 3600 &>/dev/null &
+    echo "Enable caffeinate for 1h"
+else
+    unit=$(echo -n $1 | tail -c 1)
+    timeValueLenght=$((${#1}-1))
+    timeValue=$(echo $1 | cut -c1-$timeValueLenght)
+    if [ "$timeValue" -eq "$timeValue" ] 2>/dev/null
+    then
+        if [[ $unit == "s" ]]
+        then
+            seconds=$(( $timeValue ))
+        elif [[ $unit == "m" ]]
+        then
+            seconds=$(( $timeValue*60 ))
+        elif [[ $unit == "h" ]]
+        then
+            seconds=$(( $timeValue*3600 ))
+        elif [[ $unit == "d" ]]
+        then
+            seconds=$(( $timeValue*86400 ))
+        else
+            echo "Wrong time input!"
+            exit 1
+        fi
+        killall caffeinate
+        caffeinate -t $seconds &>/dev/null &
+        echo "Enable caffeinate for $1"
+    else
+        echo "Wrong time input!"
+        exit 1
+    fi
+fi
+```
+
+**How it works:**
+- Takes optional time argument (e.g., "2h", "30m", "1d")
+- Defaults to 1 hour if no time specified
+- Parses time unit (s, m, h, d) and converts to seconds
+- Uses macOS `caffeinate` command to prevent sleep
+- Kills any existing caffeinate process before starting new one
+
+</Accordion>
+
+<Accordion title="Low Power Mode.sh - Toggle Low Power Mode">
+
+Enable or disable Low Power Mode with automatic brightness adjustment.
+
+```applescript
+#!/usr/bin/osascript
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Low Power Mode
+# @raycast.mode silent
+# @raycast.icon 🔋
+
+on getLowPowerMode(str)
+    set trimmedStr to do shell script "echo " & quoted form of str & " | xargs"
+    set lastChar to character (length of trimmedStr) of trimmedStr
+    set mode to lastChar as number
+    return mode
+end getLowPowerMode
+
+tell application "System Settings"
+    set output to do shell script "pmset -g | grep lowpowermode" 
+end tell
+
+set result to getLowPowerMode(output)
+if result = 0 then
+    tell application "System Settings"
+        do shell script "pmset -a lowpowermode 1" with administrator privileges
+    end tell
+    do shell script "echo Low Power Mode turned on."
+else
+    tell application "System Settings"
+        do shell script "pmset -a lowpowermode 0" with administrator privileges
+    end tell
+    
+    -- Restore brightness to 100%
+    repeat 25 times
+        tell application "System Events"
+            key code 144
+        end tell
+    end repeat
+end if
+```
+
+**How it works:**
+- Checks current low power mode status using `pmset -g`
+- Toggles the mode on/off using `pmset -a lowpowermode`
+- Requires administrator privileges to change system settings
+- Automatically restores brightness when disabling low power mode
+
+</Accordion>
+
+## Audio Controls
+
+Quickly control your Mac's audio settings.
+
+<Accordion title="toggle-mic.applescript - Toggle Microphone On/Off">
+
+Instantly mute or unmute your microphone.
+
+```applescript
+#!/usr/bin/osascript
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Toggle Microphone
+# @raycast.mode silent
+# @raycast.packageName System
+# @raycast.icon 🎙
+# @raycast.description Toggles microphone.
+
+on getMicrophoneVolume()
+    input volume of (get volume settings)
+end getMicrophoneVolume
+
+on disableMicrophone()
+    set volume input volume 0
+    log "Microphone turned off 🔴"
+end disableMicrophone
+
+on enableMicrophone()
+    set volume input volume 100
+    log "Microphone turned on 🟢"
+end enableMicrophone
+
+if getMicrophoneVolume() is greater than 0 then
+    disableMicrophone()
+else
+    enableMicrophone()
+end if
+```
+
+**How it works:**
+- Gets current microphone input volume
+- Sets volume to 0 (muted) or 100 (unmuted) based on current state
+- Provides immediate visual feedback with emoji indicators
+
+</Accordion>
+
+## Display Controls
+
+<Accordion title="brightness.sh - Set Screen Brightness">
+
+Adjust your screen brightness from Raycast.
+
+```bash
+#!/bin/bash
+
+# Dependency: This script requires `brightness` cli installed: http://bergdesign.com/brightness/
+# Install via homebrew: `brew install brightness`
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Brightness
+# @raycast.mode silent
+# @raycast.icon ☀️
+# @raycast.packageName System brightness
+# @raycast.argument1 { "type": "text", "placeholder": "brightness", "percentEncoded": false }
+# @raycast.description Set system brightness
+
+brightness $(awk '{print $1*$2}' <<<"${1} 0.01")
+```
+
+**How it works:**
+- Requires the `brightness` CLI tool (install with Homebrew)
+- Takes brightness value as percentage (0-100)
+- Converts percentage to decimal value for the brightness command
+
+</Accordion>
+
+## Storage Management
+
+<Accordion title="disk-usage.sh - Monitor Disk Space">
+
+View available disk space in your menu bar.
+
+```bash
+#!/bin/bash
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Disk Usage
+# @raycast.mode inline
+# @raycast.refreshTime 1m
+# @raycast.icon 💿
+# @raycast.packageName System
+# @raycast.description Show disk usage for / (root)
+
+x=$(df -h / | awk 'FNR == 2 {printf "Root: %s available of %s",$4,$2;}')
+
+echo "$x"
+```
+
+**How it works:**
+- Uses `df -h` to get disk usage in human-readable format
+- Parses output to extract available space and total size
+- Refreshes every minute to keep information current
+- Displays in inline mode for menu bar visibility
+
+</Accordion>
+
+## Screenshot Management
+
+<Accordion title="copy-last-screenshot.swift - Copy Latest Screenshot">
+
+Quickly copy your most recent screenshot to the clipboard.
+
+```swift
+#!/usr/bin/swift
+
+// Required parameters:
+// @raycast.schemaVersion 1
+// @raycast.title Copy Last Screenshot
+// @raycast.mode silent
+// @raycast.packageName System
+// @raycast.icon 📸
+// @raycast.description Copies the last screenshot to the clipboard.
+
+import Cocoa
+
+let query = NSMetadataQuery()
+guard let lastScreenshot = query.searchScreenshots()?.first, 
+      let path = lastScreenshot.value(forAttribute: "kMDItemPath") as? String else {
+  print("Cannot find screenshot")
+  exit(1)
+}
+
+let fileURL = URL(fileURLWithPath: path)
+NSPasteboard.general.clearContents()
+NSPasteboard.general.writeObjects([fileURL as NSPasteboardWriting])
+
+print("Copied last screenshot")
+
+extension NSMetadataQuery {
+  func searchScreenshots() -> [NSMetadataItem]? {
+    predicate = NSPredicate(format: "kMDItemIsScreenCapture = 1")
+    sortDescriptors = [NSSortDescriptor(key: "kMDItemFSCreationDate", ascending: false)]
+
+    NotificationCenter.default.addObserver(
+      forName: .NSMetadataQueryDidFinishGathering, 
+      object: nil, 
+      queue: nil
+    ) { [weak self] _ in
+      self?.disableUpdates()
+      self?.stop()
+      CFRunLoopStop(CFRunLoopGetCurrent());
+    }
+
+    guard start() else { return nil }
+    CFRunLoopRun()
+
+    return results.compactMap { $0 as? NSMetadataItem }
+  }
+}
+```
+
+**How it works:**
+- Uses macOS Spotlight metadata query (`NSMetadataQuery`) to find screenshots
+- Filters files by `kMDItemIsScreenCapture` attribute
+- Sorts by creation date to get the most recent
+- Copies file URL to clipboard using `NSPasteboard`
+- Written in Swift for native macOS integration
+
+</Accordion>
+
+## See Also
+
+<CardGroup cols={2}>
+  <Card title="Developer Utils" icon="code" href="/examples/developer-utils">
+    Git, Docker, and encoding utilities
+  </Card>
+  <Card title="App Integrations" icon="grid" href="/examples/apps">
+    Control Bear, Spotify, Safari, and more
+  </Card>
+  <Card title="Media Controls" icon="music" href="/examples/media">
+    Music, volume, and playback controls
+  </Card>
+  <Card title="Productivity" icon="check" href="/examples/productivity">
+    Todo lists, timers, and password managers
+  </Card>
+</CardGroup>

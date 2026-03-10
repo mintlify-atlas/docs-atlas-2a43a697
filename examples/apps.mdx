@@ -1,0 +1,319 @@
+---
+title: App Integrations
+description: Script examples for controlling third-party apps like Bear, Spotify, Safari, Things, and more
+icon: 'grid'
+---
+
+These examples demonstrate how to create script commands that integrate with popular macOS applications using URL schemes, AppleScript, and shell commands.
+
+## Bear Note-Taking App
+
+Integrate with Bear using its powerful URL scheme.
+
+<Accordion title="bear-add-note.sh - Create New Note">
+
+Quickly create a new note in Bear with title, content, and clipboard integration.
+
+```bash
+#!/bin/bash
+
+# Install Bear via Mac App Store: https://apps.apple.com/us/app/bear/id1091189122
+
+# @raycast.title Add Note
+# @raycast.description Add a new note to Bear.
+# @raycast.icon images/bear-light.png
+# @raycast.iconDark images/bear-dark.png
+# @raycast.mode silent
+# @raycast.packageName Bear
+# @raycast.schemaVersion 1
+# @raycast.argument1 { "type": "text", "placeholder": "Title", "percentEncoded": true}
+# @raycast.argument2 { "type": "text", "placeholder": "Content", "optional": true, "percentEncoded": true}
+# @raycast.argument3 { "type": "text", "placeholder": "Use Clipboard?", "optional": true, "percentEncoded": true}
+
+open "bear://x-callback-url/create?title=${1}&clipboard=${3}&text=${2}"
+
+echo "Note created!"
+```
+
+**How it works:**
+- Uses Bear's `x-callback-url` API for deep linking
+- Takes up to three arguments: title (required), content, and clipboard flag
+- If clipboard flag is set, appends clipboard content to the note
+- `percentEncoded: true` ensures special characters are properly encoded
+- Opens Bear app and creates note instantly
+
+</Accordion>
+
+<Accordion title="bear-search.sh - Search Notes">
+
+Search Bear notes by keyword or tag.
+
+```bash
+#!/bin/bash
+
+# Install Bear via Mac App Store: https://apps.apple.com/us/app/bear/id1091189122
+
+# @raycast.title Search
+# @raycast.description Search notes by keyword and/or tag in Bear.
+# @raycast.icon images/bear-light.png
+# @raycast.iconDark images/bear-dark.png
+# @raycast.mode silent
+# @raycast.packageName Bear
+# @raycast.schemaVersion 1
+# @raycast.argument1 { "type": "text", "placeholder": "Term", "optional": true, "percentEncoded": true}
+# @raycast.argument2 { "type": "text", "placeholder": "Tag", "optional": true, "percentEncoded": true}
+
+if [ ! -z "$1" ]; then
+  if [ ! -z "$2" ]; then
+    open "bear://x-callback-url/search?term=${1}&tag=${2}"
+  else
+    open "bear://x-callback-url/search?term=${1}"
+  fi
+else
+  if [ ! -z "$2" ]; then
+    open "bear://x-callback-url/search?tag=${2}"
+  else
+    open "bear://"
+  fi
+fi
+```
+
+**How it works:**
+- Supports search by term, tag, or both
+- Both arguments are optional
+- If no arguments provided, simply opens Bear
+- Constructs appropriate URL based on which arguments are provided
+- Great for quickly jumping to specific notes or browsing by tag
+
+</Accordion>
+
+## Spotify Music Control
+
+<Accordion title="spotify-current-track.applescript - Show Now Playing">
+
+Display the currently playing Spotify track in Raycast's menu bar.
+
+```applescript
+#!/usr/bin/osascript
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Current Track
+# @raycast.mode inline
+# @raycast.refreshTime 30s
+# @raycast.packageName Spotify
+# @raycast.icon images/spotify-logo.png
+# @raycast.description Show currently playing track in Spotify.
+
+if application "Spotify" is not running then
+    log "Not playing"
+    return
+end if
+
+property currentTrackName : "Unknown Track"
+property currentTrackArtist : "Unknown Artist"
+property playerState : "stopped"
+
+tell application "Spotify"
+    try
+        set currentTrackName to name of the current track
+        set currentTrackArtist to artist of the current track
+        set playerState to player state as string
+    end try
+end tell
+
+if playerState is "playing" then
+    log currentTrackName & " by " & currentTrackArtist
+else if playerState is "paused" then
+    log currentTrackName & " by " & currentTrackArtist & " (Paused)"
+else
+    log "Not playing"
+end if
+```
+
+**How it works:**
+- Checks if Spotify is running before querying
+- Uses AppleScript to communicate with Spotify app
+- Gets track name, artist, and player state
+- Updates every 30 seconds when shown in menu bar
+- Shows "(Paused)" indicator when music is paused
+
+</Accordion>
+
+## Safari Browser Automation
+
+<Accordion title="safari-close-duplicated-tabs.applescript - Remove Duplicate Tabs">
+
+Clean up Safari by closing tabs with duplicate URLs.
+
+```applescript
+#!/usr/bin/osascript
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Close Duplicated Tabs
+# @raycast.mode silent
+# @raycast.packageName Safari
+# @raycast.icon images/safari.png
+# @raycast.description Close tabs with the same URL.
+
+tell window 1 of application "Safari"
+  set visitedURLs to {}
+  set closedTabs to 0
+  set allTabs to tabs
+
+  repeat with i from length of allTabs to 1 by -1
+    set currentTab to item i of allTabs
+    set currentURL to URL of currentTab
+
+    if visitedURLs contains currentURL then
+      close currentTab
+      set closedTabs to closedTabs + 1
+    else 
+      copy currentURL to end of visitedURLs
+    end if
+  end repeat
+
+  if closedTabs is equal to 1 then
+    log "Closed 1 duplicated tab"
+  else if closedTabs is greater than 1 then
+    log "Closed " & closedTabs & " duplicated tab"
+  else 
+    log "No duplicated tabs found"
+  end if 
+end
+```
+
+**How it works:**
+- Iterates through all tabs in reverse order (to avoid index shifting)
+- Maintains a list of visited URLs
+- Closes any tab with a URL that's already been seen
+- Provides feedback on how many duplicates were closed
+- Operates on the frontmost Safari window
+
+</Accordion>
+
+## Things Task Manager
+
+<Accordion title="things-create-todo.sh - Add To-Do Item">
+
+Quickly add tasks to Things with optional notes and scheduling.
+
+```bash
+#!/bin/bash
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Create To-Do
+# @raycast.mode silent
+# @raycast.icon images/things.png
+# @raycast.packageName Things
+# @raycast.argument1 { "type": "text", "placeholder": "Title", "percentEncoded": true }
+# @raycast.argument2 { "type": "text", "placeholder": "Notes", "percentEncoded": true, "optional": true }
+# @raycast.argument3 { "type": "text", "placeholder": "When (e.g. \"today\")", "percentEncoded": true, "optional": true }
+# @raycast.description Create a new To-Do with title and optional deadline.
+
+open "things:///add?title=$1&notes=$2&when=$3"
+echo "Created To-Do"
+```
+
+**How it works:**
+- Uses Things URL scheme for task creation
+- Supports title (required), notes, and scheduling
+- `when` parameter accepts: "today", "tomorrow", "evening", "anytime", specific dates
+- URL encoding ensures special characters work correctly
+- Instantly creates and opens the task in Things
+
+</Accordion>
+
+## Apple Music
+
+<Accordion title="apple-music-current-track.applescript - Now Playing Display">
+
+Show what's playing in Apple Music.
+
+```applescript
+#!/usr/bin/osascript
+
+# @raycast.schemaVersion 1
+# @raycast.title Current Track
+# @raycast.mode inline
+# @raycast.refreshTime 10s
+# @raycast.packageName Music
+# @raycast.icon images/apple-music-logo.png
+# @raycast.description Show currently playing track in Music.
+
+if application "Music" is not running then
+    log "Not playing"
+    return
+end if
+
+property currentTrackName : "Unknown Track"
+property currentTrackArtist : "Unknown Artist"
+property playerState : "stopped"
+
+tell application "Music"
+    try
+        set currentTrackName to name of the current track
+        set currentTrackArtist to artist of the current track
+        set playerState to player state as string
+    end try
+end tell
+
+if playerState is "playing" then
+    log currentTrackName & " - " & currentTrackArtist
+else if playerState is "paused" then
+    log currentTrackName & " - " & currentTrackArtist & " (Paused)"
+else
+    log "Not playing"
+end if
+```
+
+**How it works:**
+- Similar to Spotify script but for Apple Music
+- Refreshes every 10 seconds
+- Checks if Music app is running
+- Displays track name, artist, and play state
+- Shows in Raycast menu bar for quick visibility
+
+</Accordion>
+
+## Integration Patterns
+
+<Note>
+**URL Schemes:** Apps like Bear, Things, and Spotify support URL schemes (`app://action?param=value`). These are perfect for script commands because they're fast, don't require AppleScript support, and work consistently.
+</Note>
+
+<Tip>
+**Finding URL Schemes:** Check an app's documentation for URL scheme support. Many productivity apps provide comprehensive URL scheme APIs for automation. Search for "[app name] URL scheme" or "[app name] x-callback-url".
+</Tip>
+
+<Warning>
+**AppleScript Security:** Scripts using AppleScript may require accessibility permissions. Users will be prompted to grant permissions when first running the script.
+</Warning>
+
+## Creating Your Own Integrations
+
+To integrate with other apps:
+
+1. **Check for URL Schemes** - The easiest method. Look in app documentation.
+2. **Try AppleScript** - Use Script Editor to test if the app supports AppleScript.
+3. **Use CLI Tools** - Some apps provide command-line interfaces.
+4. **Call APIs** - Web-based apps can be controlled via HTTP requests.
+
+## See Also
+
+<CardGroup cols={2}>
+  <Card title="System Scripts" icon="computer" href="/examples/system">
+    Battery, network, and system monitoring
+  </Card>
+  <Card title="Developer Utils" icon="code" href="/examples/developer-utils">
+    Git, Docker, and encoding utilities
+  </Card>
+  <Card title="Media Controls" icon="music" href="/examples/media">
+    Music, volume, and playback controls
+  </Card>
+  <Card title="Productivity" icon="check" href="/examples/productivity">
+    Todo lists, timers, and password managers
+  </Card>
+</CardGroup>

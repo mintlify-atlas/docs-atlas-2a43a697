@@ -1,0 +1,199 @@
+---
+title: Productivity Scripts
+description: Enhance your productivity with password managers, OCR, timers, and utilities
+---
+
+Boost your productivity with scripts for password management, optical character recognition, time tracking, and essential writing tools.
+
+## Password Management
+
+<CardGroup cols={2}>
+  <Card title="Bitwarden" icon="shield" href="https://github.com/raycast/script-commands/tree/master/commands/productivity/bitwarden">
+    Comprehensive Bitwarden password manager integration with search, copy, and vault management.
+    **Multiple scripts available**
+  </Card>
+</CardGroup>
+
+### Bitwarden Features
+
+- **Search Passwords** - Quick password lookup
+- **Copy to Clipboard** - Securely copy credentials
+- **Generate Passwords** - Create strong passwords
+- **Vault Management** - Organize credentials
+- **Secure Notes** - Store sensitive information
+- **TOTP Codes** - Two-factor authentication
+- **Auto-lock** - Security settings
+
+## OCR (Optical Character Recognition)
+
+<CardGroup cols={2}>
+  <Card title="macOCR" icon="scan-text" href="https://github.com/raycast/script-commands/tree/master/commands/productivity/macocr">
+    Extract text from images using macOS's built-in OCR capabilities.
+  </Card>
+  
+  <Card title="Tesseract OCR" icon="eye" href="https://github.com/raycast/script-commands/tree/master/commands/productivity/tesseract">
+    Advanced OCR with Tesseract for text extraction from images and PDFs.
+  </Card>
+</CardGroup>
+
+### OCR Capabilities
+
+- **Screenshot OCR** - Extract text from screen captures
+- **Image to Text** - Convert images to editable text
+- **PDF Text Extraction** - Pull text from PDF documents
+- **Multi-language Support** - Recognize various languages
+- **Clipboard Integration** - Copy recognized text instantly
+
+## Time Management
+
+<CardGroup cols={2}>
+  <Card title="Pomodoro Timer" icon="timer" href="https://github.com/raycast/script-commands/tree/master/commands/productivity/pomodoro">
+    Focus timer using the Pomodoro Technique with work sessions and breaks.
+  </Card>
+  
+  <Card title="Stopwatch" icon="clock" href="https://github.com/raycast/script-commands/tree/master/commands/productivity/stopwatch">
+    Simple stopwatch for time tracking and measurements.
+  </Card>
+</CardGroup>
+
+### Pomodoro Features
+
+- **Start Work Session** - Begin 25-minute focus period
+- **Short Break** - 5-minute break between sessions
+- **Long Break** - 15-minute break after 4 sessions
+- **Custom Durations** - Adjust timer lengths
+- **Notifications** - Alerts when timers complete
+- **Session Tracking** - Count completed pomodoros
+
+### Stopwatch Features
+
+- **Start/Stop** - Control timer
+- **Lap Times** - Record intervals
+- **Reset** - Clear timer
+- **Display Formats** - Various time formats
+
+## Image Utilities
+
+<CardGroup cols={2}>
+  <Card title="Imgur Upload" icon="image" href="https://github.com/raycast/script-commands/tree/master/commands/productivity/imgur">
+    Upload images to Imgur for quick sharing and hosting.
+  </Card>
+</CardGroup>
+
+### Imgur Features
+
+- **Upload from Clipboard** - Share screenshots instantly
+- **Upload Files** - Select images to upload
+- **Copy Links** - Get shareable URLs
+- **Anonymous Upload** - No account required
+- **Album Management** - Organize uploads
+
+## PDF Tools
+
+<CardGroup cols={2}>
+  <Card title="QPDF Utilities" icon="file-text" href="https://github.com/raycast/script-commands/tree/master/commands/productivity/qpdf">
+    PDF manipulation tools for merging, splitting, and optimization.
+  </Card>
+</CardGroup>
+
+### QPDF Capabilities
+
+- **Merge PDFs** - Combine multiple documents
+- **Split PDFs** - Extract pages
+- **Compress PDFs** - Reduce file size
+- **Encrypt/Decrypt** - Secure documents
+- **Repair PDFs** - Fix corrupted files
+
+## Writing Tools
+
+<CardGroup cols={2}>
+  <Card title="Writing Utilities" icon="pen-tool" href="https://github.com/raycast/script-commands/tree/master/commands/productivity/writing">
+    Tools to enhance your writing workflow.
+  </Card>
+</CardGroup>
+
+### Writing Features
+
+- **Word Count** - Count words in text or files
+- **Grammar Check** - Basic grammar utilities
+- **Text Statistics** - Analyze reading time, word frequency
+- **Markdown Tools** - Format and convert markdown
+
+## Productivity Tips
+
+### Password Management Best Practices
+
+1. **Use Strong Passwords** - Generate unique passwords for each service
+2. **Enable 2FA** - Add two-factor authentication where available
+3. **Regular Backups** - Keep encrypted vault backups
+4. **Master Password** - Use a strong, memorable master password
+5. **Security Audit** - Regularly check for weak or reused passwords
+
+### OCR Workflow
+
+1. **Take Screenshot** - Capture the text you want to extract
+2. **Run OCR Script** - Process image to extract text
+3. **Review Output** - Verify accuracy of recognized text
+4. **Use Text** - Paste into documents or apps
+
+### Time Tracking Strategies
+
+1. **Pomodoro Technique** - Work in focused 25-minute sessions
+2. **Break Discipline** - Take regular breaks to avoid burnout
+3. **Track Progress** - Count completed sessions
+4. **Eliminate Distractions** - Use Do Not Disturb during work sessions
+5. **Adjust Timing** - Customize session lengths to your needs
+
+### Image Sharing Workflow
+
+1. **Capture or Create** - Screenshot or select image
+2. **Quick Upload** - Use Imgur scripts for instant hosting
+3. **Get Link** - Copy URL to clipboard
+4. **Share** - Paste link in messages, emails, or documents
+
+## Integration Examples
+
+### Bitwarden + System
+
+Combine Bitwarden scripts with system automation:
+- Auto-fill passwords in browsers
+- Quick credential lookup during development
+- Secure note access for API keys
+
+### OCR + Clipboard
+
+Enhance OCR with clipboard workflows:
+- Screenshot → OCR → Copy text
+- Image file → Extract text → Save to file
+- PDF → OCR → Editable document
+
+### Pomodoro + Do Not Disturb
+
+Create focused work sessions:
+- Start Pomodoro → Enable DND
+- Work session ends → Disable DND
+- Break time → Check notifications
+
+## Requirements
+
+Some productivity scripts have dependencies:
+
+### Bitwarden
+- Bitwarden CLI installed (`brew install bitwarden-cli`)
+- Bitwarden account
+- Login credentials
+
+### Tesseract OCR
+- Tesseract installed (`brew install tesseract`)
+- Optional: Language packs for non-English text
+
+### QPDF
+- QPDF installed (`brew install qpdf`)
+
+### Imgur
+- Optional: Imgur API key for authenticated uploads
+- No account needed for anonymous uploads
+
+## View All Scripts
+
+Explore the complete productivity collection on [GitHub](https://github.com/raycast/script-commands/tree/master/commands/productivity) to view source code, installation instructions, and contribute your own productivity tools.

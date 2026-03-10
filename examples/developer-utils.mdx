@@ -1,0 +1,337 @@
+---
+title: Developer Utilities
+description: Script examples for developers including Git helpers, Docker commands, encoding tools, and more
+icon: 'code'
+---
+
+These examples show how to create developer-focused script commands for version control, containerization, encoding/decoding, and other common development tasks.
+
+## Git Helpers
+
+Streamline your Git workflow with these repository management scripts.
+
+<Accordion title="git-status.sh - Show Repository Status">
+
+Display a color-coded summary of your Git repository's status in Raycast's menu bar.
+
+```bash
+#!/bin/bash
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Status
+# @raycast.mode inline
+# @raycast.refreshTime 5m
+# @raycast.icon ./images/git.png
+# @raycast.packageName Git
+# @raycast.currentDirectoryPath ~/Developer/script-commands
+# @raycast.description Shows the status of your Git repository.
+
+MESSAGE=""
+
+ADDED=$(git status --short | grep -c " A")
+if [ $ADDED -gt 0 ]; then
+  MESSAGE="$MESSAGE \\033[32m$ADDED Added\\033[0m"
+fi
+
+MODIFIED=$(git status --short | grep -c " M")
+if [ $MODIFIED -gt 0 ]; then
+  MESSAGE="$MESSAGE \\033[33m$MODIFIED Modified\\033[0m"
+fi
+
+DELETED=$(git status --short | grep -c " D")
+if [ $DELETED -gt 0 ]; then
+  MESSAGE="$MESSAGE \\033[31m$DELETED Deleted\\033[0m"
+fi
+
+UNTRACKED=$(git status --short | grep -c "??")
+if [ $UNTRACKED -gt 0 ]; then
+  MESSAGE="$MESSAGE \\033[34m$UNTRACKED Untracked\\033[0m"
+fi
+
+if [ -z "$MESSAGE" ]; then
+  MESSAGE="No pending changes"
+fi
+
+echo -e $MESSAGE
+```
+
+**How it works:**
+- Uses `git status --short` to get concise repository status
+- Counts files by state: Added (green), Modified (yellow), Deleted (red), Untracked (blue)
+- Updates every 5 minutes when displayed in menu bar
+- Uses ANSI color codes for visual distinction
+- Set `currentDirectoryPath` to your repository location
+
+</Accordion>
+
+<Accordion title="git-switch-branch.sh - Switch Git Branch">
+
+Quickly switch to a different branch or create a new one.
+
+```bash
+#!/bin/bash
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Switch Branch
+# @raycast.mode compact
+# @raycast.icon ./images/git.png
+# @raycast.packageName Git
+# @raycast.argument1 { "type": "text", "placeholder": "Name", "optional": true }
+# @raycast.currentDirectoryPath ~/Developer/script-commands
+# @raycast.description Switch to a new branch. If not name was provided, it checks out the default branch.
+
+if [ -n "$1" ]; then
+  BRANCH_NAME="$1"
+else
+  BRANCH_NAME=$(git symbolic-ref --short HEAD)
+fi
+
+git checkout --branch $BRANCH_NAME
+```
+
+**How it works:**
+- Takes optional branch name as argument
+- Creates and switches to new branch if it doesn't exist
+- Defaults to current branch if no name provided
+- Uses `git checkout --branch` for branch creation and switching
+
+</Accordion>
+
+## Docker Commands
+
+Manage Docker containers directly from Raycast.
+
+<Accordion title="docker-ps.sh - List Docker Containers">
+
+View all running Docker containers.
+
+```bash
+#!/bin/bash
+
+# Dependency: This script requires `docker for mac` to be installed
+# https://docs.docker.com/docker-for-mac/install/
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title List Containers
+# @raycast.mode fullOutput
+# @raycast.icon images/docker.png
+# @raycast.packageName Docker
+# @raycast.description List containers in Docker
+
+if ! command -v docker &> /dev/null; then
+    echo "docker for mac is required (https://docs.docker.com/docker-for-mac/install/)."
+    exit 1
+fi
+
+docker ps
+```
+
+**How it works:**
+- Checks if Docker is installed before running
+- Executes `docker ps` to list running containers
+- Displays full output including container ID, image, status, and ports
+- Provides helpful error message if Docker is not installed
+
+</Accordion>
+
+## Encoding & Decoding
+
+Quickly encode and decode text data.
+
+<Accordion title="base64-encode-input.sh - Base64 Encode Text">
+
+Encode text to Base64 and copy to clipboard.
+
+```bash
+#!/bin/bash
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Base64 Encode
+# @raycast.mode silent
+# @raycast.packageName Developer Utilities
+# @raycast.icon 🔐
+# @raycast.argument1 { "type": "text", "placeholder": "text", "optional": false }
+# @raycast.description Encode any text data by using base64
+
+echo $1 | base64 | pbcopy
+echo "Copied to clipboard"
+```
+
+**How it works:**
+- Takes text input as argument
+- Pipes text through `base64` command
+- Automatically copies encoded result to clipboard using `pbcopy`
+- Runs in silent mode for quick execution
+
+</Accordion>
+
+<Accordion title="base64-decode-input.sh - Base64 Decode Text">
+
+Decode Base64 text back to original format.
+
+```bash
+#!/bin/bash
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Base64 Decode
+# @raycast.mode silent
+# @raycast.packageName Developer Utilities
+# @raycast.icon 🔓
+# @raycast.argument1 { "type": "text", "placeholder": "text", "optional": false }
+# @raycast.description Decode the base64 string
+
+echo $1 | base64 --decode | pbcopy
+echo "Copied to clipboard"
+```
+
+**How it works:**
+- Takes Base64 encoded text as argument
+- Uses `base64 --decode` to convert back to original
+- Copies decoded result to clipboard
+- Ideal for quickly decoding JWT tokens, API responses, etc.
+
+</Accordion>
+
+## JSON Processing
+
+<Accordion title="json-stringify-text.js - Convert Text to JSON String">
+
+Convert clipboard text to a JSON-escaped string.
+
+```javascript
+#!/usr/bin/env node
+
+// Required parameters:
+// @raycast.schemaVersion 1
+// @raycast.title Json Stringify Text
+// @raycast.mode fullOutput
+// @raycast.icon 💻
+// @raycast.packageName Developer Utilities
+// @raycast.description Get JSON-formatted text
+
+const child_process = require("child_process");
+
+// Function to read the output of pbpaste command
+function pbpaste() {
+  return new Promise((resolve, reject) => {
+    const child = child_process.spawn('pbpaste');
+
+    let response = "";
+    child.stdout.on("data", (chunk) => {
+        response += chunk;
+    });
+
+    child.on("close", (code) => {
+        if (code != 0) {
+            reject();
+        } else {
+            resolve(response);
+        }
+    });
+  });
+};
+
+// Function to copy data to clipboard
+function pbcopy(data) {
+  return new Promise(function(resolve, reject) {
+    const child = child_process.spawn('pbcopy');
+
+    child.on('error', function(err) {
+      reject(err);
+    });
+
+    child.on('close', function(err) {
+      resolve(data);
+    });
+
+    child.stdin.write(data);
+    child.stdin.end();
+  });
+};
+
+// Stringify the text from clipboard and copy back to it
+pbpaste()
+.then(function(result) {
+  return JSON.stringify(result);
+})
+.then(function(string) {
+  return pbcopy(string);
+})
+.then(function(string) {
+  console.log(string);
+}).catch(function(e) {
+  console.error(new Error('Could not stringify text'));
+  console.error(e);
+});
+```
+
+**How it works:**
+- Reads text from clipboard using `pbpaste`
+- Uses Node.js `JSON.stringify()` to escape special characters
+- Copies stringified result back to clipboard
+- Perfect for preparing text to embed in JSON documents
+- Uses promises for async clipboard operations
+
+</Accordion>
+
+## ID Generation
+
+<Accordion title="generate-uuid.sh - Generate UUID">
+
+Generate a universally unique identifier.
+
+```bash
+#!/bin/bash
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Generate UUID
+# @raycast.mode silent
+# @raycast.packageName Developer Utilities
+# @raycast.icon 💻
+# @raycast.description Generates a UUID and copies it to the clipboard.
+
+uuidgen | pbcopy
+echo "UUID Generated"
+```
+
+**How it works:**
+- Uses macOS built-in `uuidgen` command
+- Automatically copies UUID to clipboard
+- Runs instantly in silent mode
+- No dependencies required
+- Perfect for generating IDs for databases, API keys, etc.
+
+</Accordion>
+
+## Usage Tips
+
+<Note>
+**Pro Tip:** For Git scripts, update the `@raycast.currentDirectoryPath` parameter to point to your repository. You can create multiple copies of these scripts for different projects.
+</Note>
+
+<Tip>
+Many of these scripts can be extended with additional arguments. For example, you could modify the UUID generator to generate multiple UUIDs at once, or add options to the Base64 encoder for different encoding formats.
+</Tip>
+
+## See Also
+
+<CardGroup cols={2}>
+  <Card title="System Scripts" icon="computer" href="/examples/system">
+    Battery, network, and system monitoring
+  </Card>
+  <Card title="App Integrations" icon="grid" href="/examples/apps">
+    Control Bear, Spotify, Safari, and more
+  </Card>
+  <Card title="Media Controls" icon="music" href="/examples/media">
+    Music, volume, and playback controls
+  </Card>
+  <Card title="Productivity" icon="check" href="/examples/productivity">
+    Todo lists, timers, and password managers
+  </Card>
+</CardGroup>

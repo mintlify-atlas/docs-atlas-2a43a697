@@ -1,0 +1,594 @@
+---
+title: Troubleshooting
+description: Common issues and solutions for Raycast Script Commands
+icon: wrench
+---
+
+Having trouble with your Script Commands? This guide covers common issues and their solutions.
+
+## Script Not Appearing in Raycast
+
+If your script isn't showing up in Raycast, check these common issues:
+
+<AccordionGroup>
+  <Accordion title="Filename contains .template.">
+    **Problem:** Scripts with `.template.` in the filename are intentionally ignored by Raycast.
+    
+    **Solution:** 
+    <Steps>
+      <Step title="Copy the template">
+        Create a copy of your template file:
+        ```bash
+        cp script.template.sh script.sh
+        ```
+      </Step>
+      
+      <Step title="Configure the script">
+        Edit the new file and replace any placeholder values (API keys, usernames, etc.).
+      </Step>
+      
+      <Step title="Refresh Raycast">
+        The script should now appear in Raycast automatically.
+      </Step>
+    </Steps>
+  </Accordion>
+  
+  <Accordion title="Missing required metadata">
+    **Problem:** Scripts must have all required metadata parameters to be recognized.
+    
+    **Required parameters:**
+    - `schemaVersion` (currently only version 1)
+    - `title` (the display name)
+    - `mode` (silent, compact, fullOutput, or inline)
+    
+    **Solution:**
+    ```bash
+    #!/bin/bash
+
+    # Required parameters:
+    # @raycast.schemaVersion 1
+    # @raycast.title My Script Command
+    # @raycast.mode compact
+    ```
+    
+    <Note>
+    All three parameters must be present for the script to appear in Raycast.
+    </Note>
+  </Accordion>
+  
+  <Accordion title="Incorrect comment syntax">
+    **Problem:** Metadata parameters must use the correct comment syntax for your language.
+    
+    **Solution:**
+    
+    Use `#` for Bash, Python, and AppleScript:
+    ```bash
+    # @raycast.title My Command
+    ```
+    
+    Use `//` for Swift and JavaScript:
+    ```swift
+    // @raycast.title My Command
+    ```
+    
+    <Warning>
+    Block comments (`/* */`) are not supported for metadata.
+    </Warning>
+  </Accordion>
+  
+  <Accordion title="Script directory not added to Raycast">
+    **Problem:** The directory containing your script hasn't been added to Raycast.
+    
+    **Solution:**
+    <Steps>
+      <Step title="Open Raycast preferences">
+        Press `⌘ ,` in Raycast or open Preferences.
+      </Step>
+      
+      <Step title="Navigate to Extensions">
+        Click on the Extensions tab.
+      </Step>
+      
+      <Step title="Add script directory">
+        Click the `+` button and select "Add Script Directory", then choose your scripts folder.
+      </Step>
+    </Steps>
+  </Accordion>
+</AccordionGroup>
+
+## Shell Scripts Not Working
+
+Bash scripts can fail for various reasons. Here's how to debug them:
+
+<AccordionGroup>
+  <Accordion title="Filename contains .template.">
+    **Problem:** Same as above - template files are not executed.
+    
+    **Solution:** Remove `.template.` from the filename after configuring the script.
+  </Accordion>
+  
+  <Accordion title="Syntax errors">
+    **Problem:** The script has syntax errors or unexpected characters.
+    
+    **Solution:**
+    <Steps>
+      <Step title="Run ShellCheck">
+        Use [ShellCheck](https://www.shellcheck.net/) to identify issues:
+        ```bash
+        shellcheck your-script.sh
+        ```
+      </Step>
+      
+      <Step title="Fix reported issues">
+        ShellCheck will provide specific suggestions for each problem.
+      </Step>
+      
+      <Step title="Test locally">
+        Run your script from the terminal to verify it works:
+        ```bash
+        bash ./your-script.sh
+        ```
+      </Step>
+    </Steps>
+    
+    <Note>
+    All scripts submitted to the community repository must pass ShellCheck validation.
+    </Note>
+  </Accordion>
+  
+  <Accordion title="Missing shebang">
+    **Problem:** The script doesn't have a proper shebang line.
+    
+    **Solution:** Ensure the first line specifies the interpreter:
+    ```bash
+    #!/bin/bash
+    ```
+    
+    For other languages:
+    ```python
+    #!/usr/bin/env python3
+    ```
+    ```node
+    #!/usr/bin/env node
+    ```
+  </Accordion>
+  
+  <Accordion title="Permission issues">
+    **Problem:** The script file isn't executable.
+    
+    **Solution:** Make the script executable:
+    ```bash
+    chmod +x your-script.sh
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Dependency Issues
+
+<AccordionGroup>
+  <Accordion title="Command not found errors">
+    **Problem:** Your script depends on a tool that isn't installed.
+    
+    **Example error:**
+    ```
+    jq: command not found
+    ```
+    
+    **Solution:**
+    <Steps>
+      <Step title="Check the script's dependencies">
+        Look at the top of the script for dependency documentation:
+        ```bash
+        # Dependency: This script requires `jq` cli installed
+        # Install via homebrew: `brew install jq`
+        ```
+      </Step>
+      
+      <Step title="Install the required tool">
+        Follow the installation instructions provided in the script.
+      </Step>
+      
+      <Step title="Verify installation">
+        Test that the command is now available:
+        ```bash
+        which jq
+        # Should output: /usr/local/bin/jq (or similar)
+        ```
+      </Step>
+    </Steps>
+  </Accordion>
+  
+  <Accordion title="Runtime not installed">
+    **Problem:** Script requires Node.js, Python, or Swift but the runtime isn't installed.
+    
+    **Solution:**
+    
+    **For Node.js scripts:**
+    ```bash
+    # Install Node.js via Homebrew
+    brew install node
+    
+    # Verify installation
+    node --version
+    ```
+    
+    **For Python scripts:**
+    ```bash
+    # Python usually comes with macOS, but you may need Python 3
+    brew install python3
+    
+    # Verify installation
+    python3 --version
+    ```
+    
+    **For Swift scripts:**
+    ```bash
+    # Install Xcode Command Line Tools
+    xcode-select --install
+    
+    # Verify installation
+    swift --version
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Path and Environment Issues
+
+<AccordionGroup>
+  <Accordion title="Commands not found in PATH">
+    **Problem:** Script can't find commands that work in your terminal.
+    
+    **Explanation:** Raycast runs scripts in a non-login shell, which has a minimal PATH.
+    
+    **Solution:**
+    
+    Raycast automatically includes `/usr/local/bin`. For other locations, add them explicitly:
+    ```bash
+    #!/bin/bash
+
+    # Add custom paths
+    export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+    # Now your command should work
+    my-custom-command
+    ```
+  </Accordion>
+  
+  <Accordion title="Login shell behavior">
+    **Problem:** Script works with `#!/bin/bash -l` but you can't use this in the community repo.
+    
+    **Explanation:** The community repository doesn't allow login shells to ensure portability.
+    
+    **Solution:**
+    
+    Instead of relying on your shell profile, explicitly set what you need:
+    ```bash
+    #!/bin/bash
+
+    # Explicitly set PATH
+    export PATH="/opt/homebrew/bin:$PATH"
+
+    # Set any needed environment variables
+    export MY_VAR="value"
+
+    # Your script logic here
+    ```
+    
+    <Note>
+    For personal scripts (not in the community repo), you can use `#!/bin/bash -l` if needed.
+    </Note>
+  </Accordion>
+  
+  <Accordion title="Environment variables not available">
+    **Problem:** Environment variables from your shell profile aren't accessible.
+    
+    **Solution:**
+    
+    Set required variables at the top of your script:
+    ```bash
+    #!/bin/bash
+
+    # Set environment variables
+    export API_URL="https://api.example.com"
+    export EDITOR="vim"
+
+    # Your script logic
+    ```
+    
+    <Note>
+    Raycast has plans to support environment variables natively. Track progress in [this issue](https://github.com/raycast/script-commands/issues/77).
+    </Note>
+  </Accordion>
+</AccordionGroup>
+
+## Output and Display Issues
+
+<AccordionGroup>
+  <Accordion title="Script output not showing">
+    **Problem:** The script runs but you don't see any output.
+    
+    **Cause:** Wrong output mode for your use case.
+    
+    **Solution:**
+    
+    Choose the appropriate mode:
+    
+    - **silent mode:** Shows output in HUD after Raycast closes (for quick actions)
+    - **compact mode:** Shows last line in toast (for progress updates)
+    - **fullOutput mode:** Shows all output (for detailed results)
+    - **inline mode:** Shows first line in command list (for dashboard items)
+    
+    ```bash
+    # Change this to match your needs
+    # @raycast.mode fullOutput
+    ```
+  </Accordion>
+  
+  <Accordion title="Inline mode script not refreshing">
+    **Problem:** Script in inline mode doesn't update automatically.
+    
+    **Cause:** Missing or invalid `refreshTime` parameter.
+    
+    **Solution:**
+    
+    Add a valid refresh interval:
+    ```bash
+    # @raycast.mode inline
+    # @raycast.refreshTime 30s
+    ```
+    
+    Valid formats:
+    - `10s` (seconds, minimum 10)
+    - `5m` (minutes)
+    - `2h` (hours)
+    - `1d` (days)
+    
+    <Warning>
+    Only the first 10 inline commands are refreshed automatically. Others must be manually refreshed.
+    </Warning>
+  </Accordion>
+  
+  <Accordion title="Long-running task shows partial output">
+    **Problem:** Tasks like `zip` or `tar` show lots of partial progress in compact/silent modes.
+    
+    **Solution:**
+    
+    Use quiet flags for commands that generate progress output:
+    ```bash
+    # ❌ Will show lots of partial output
+    zip -r archive.zip folder/
+
+    # ✅ Quiet mode for clean output
+    zip -qr archive.zip folder/
+    echo "Archive created successfully"
+    ```
+    
+    Or switch to `fullOutput` mode:
+    ```bash
+    # @raycast.mode fullOutput
+    ```
+  </Accordion>
+  
+  <Accordion title="Colors not displaying">
+    **Problem:** ANSI color codes aren't showing in output.
+    
+    **Cause:** Colors are only supported in `inline` and `fullOutput` modes.
+    
+    **Solution:**
+    
+    Use one of these modes and proper ANSI escape codes:
+    ```bash
+    # @raycast.mode fullOutput
+
+    # Red text on green background
+    echo -e '\033[31;42mColored text\033[0m'
+    ```
+    
+    <Note>
+    See the [Output Modes documentation](/creating/output-modes) for supported color codes.
+    </Note>
+  </Accordion>
+</AccordionGroup>
+
+## Error Handling
+
+<AccordionGroup>
+  <Accordion title="Script fails silently">
+    **Problem:** Script fails but doesn't show why.
+    
+    **Solution:**
+    
+    Implement proper error handling:
+    ```bash
+    #!/bin/bash
+
+    # Enable error reporting
+    set -e  # Exit on error
+    set -u  # Exit on undefined variable
+
+    # Add error checking
+    if ! command -v jq &> /dev/null; then
+        echo "Error: jq is required. Install with: brew install jq"
+        exit 1
+    fi
+
+    # Check command results
+    if ! curl -s "$API_URL" > /tmp/response.json; then
+        echo "Failed to fetch data from API"
+        exit 1
+    fi
+
+    # Success
+    echo "Operation completed"
+    ```
+  </Accordion>
+  
+  <Accordion title="Cryptic error messages">
+    **Problem:** Error messages aren't helpful.
+    
+    **Solution:**
+    
+    Write clear, actionable error messages:
+    ```bash
+    # ❌ Not helpful
+    echo "Error"
+    exit 1
+
+    # ✅ Clear and actionable
+    echo "Error: Configuration file not found at ~/.config/myapp/config.json"
+    echo "Run 'myapp init' to create the configuration file."
+    exit 1
+    ```
+    
+    <Note>
+    For `compact` and `inline` modes, only the last line is shown in the error toast.
+    </Note>
+  </Accordion>
+</AccordionGroup>
+
+## Application Control Issues
+
+<AccordionGroup>
+  <Accordion title="AppleScript: App not found">
+    **Problem:** AppleScript fails because the target application isn't installed.
+    
+    **Solution:**
+    
+    Document the app requirement at the top of your script:
+    ```applescript
+    #!/usr/bin/osascript
+
+    # Note: Spotify v1.1.0+ required
+    # Install via: https://www.spotify.com/download/
+
+    # @raycast.schemaVersion 1
+    # @raycast.title Play Spotify
+    ```
+    
+    And optionally check if the app is running:
+    ```applescript
+    tell application "System Events"
+        if not (exists process "Spotify") then
+            return "Spotify is not running"
+        end if
+    end tell
+    ```
+  </Accordion>
+  
+  <Accordion title="Permission denied when controlling apps">
+    **Problem:** macOS blocks the script from controlling other applications.
+    
+    **Solution:**
+    <Steps>
+      <Step title="Open System Preferences">
+        Go to System Preferences → Security & Privacy → Privacy
+      </Step>
+      
+      <Step title="Add Raycast to Accessibility">
+        In the "Accessibility" section, add Raycast to the list of allowed apps.
+      </Step>
+      
+      <Step title="Add Raycast to Automation">
+        In the "Automation" section, allow Raycast to control the target application.
+      </Step>
+    </Steps>
+  </Accordion>
+</AccordionGroup>
+
+## Debugging Tips
+
+### Test from Terminal First
+
+Always test your script from the terminal before trying it in Raycast:
+
+```bash
+# Navigate to your script directory
+cd ~/path/to/scripts
+
+# Run the script
+bash ./your-script.sh
+
+# Or make it executable and run directly
+chmod +x ./your-script.sh
+./your-script.sh
+```
+
+### Add Debug Output
+
+Temporarily add debug statements to understand what's happening:
+
+```bash
+#!/bin/bash
+
+# Temporary debug output
+echo "Script started" >&2
+echo "PATH: $PATH" >&2
+echo "PWD: $PWD" >&2
+
+# Your script logic
+result=$(some-command)
+echo "Result: $result" >&2
+
+# Final output (shown in Raycast)
+echo "Success"
+```
+
+<Note>
+Output to `stderr` (using `>&2`) won't be shown in Raycast but will appear in the terminal when testing.
+</Note>
+
+### Use ShellCheck
+
+For Bash scripts, ShellCheck catches many common issues:
+
+<Steps>
+  <Step title="Install ShellCheck">
+    ```bash
+    brew install shellcheck
+    ```
+  </Step>
+  
+  <Step title="Run analysis">
+    ```bash
+    shellcheck your-script.sh
+    ```
+  </Step>
+  
+  <Step title="Fix issues">
+    ShellCheck provides detailed explanations and suggestions for each issue.
+  </Step>
+</Steps>
+
+### Check Raycast Logs
+
+Raycast logs can provide additional information:
+
+1. Open Console.app
+2. Filter for "Raycast"
+3. Look for errors or warnings related to your script
+
+## Getting Help
+
+If you're still stuck:
+
+<CardGroup cols={2}>
+  <Card title="Slack Community" icon="slack">
+    Join the [Raycast Slack community](https://www.raycast.com/community) to ask questions and get help from other developers.
+  </Card>
+  
+  <Card title="GitHub Issues" icon="github">
+    Check [existing issues](https://github.com/raycast/script-commands/issues) or create a new one for bug reports.
+  </Card>
+  
+  <Card title="Feedback Command" icon="message">
+    Use the feedback command within Raycast to report issues directly to the team.
+  </Card>
+  
+  <Card title="Email Support" icon="envelope">
+    Send an email to [feedback@raycast.com](mailto:feedback@raycast.com) for general questions.
+  </Card>
+</CardGroup>
+
+<Note>
+For issues related to Script Commands specifically (not the community repository), please use the channels above rather than GitHub issues.
+</Note>

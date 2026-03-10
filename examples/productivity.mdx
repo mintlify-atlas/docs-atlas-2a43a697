@@ -1,0 +1,429 @@
+---
+title: Productivity Scripts
+description: Examples for task management, time tracking, password managers, and workflow automation
+icon: 'check'
+---
+
+These examples demonstrate how to create script commands that enhance your productivity through task management, time tracking, password management, and automation.
+
+## Time Management
+
+Track time and manage focus sessions with Pomodoro timers.
+
+<Accordion title="pomodoro-start-timer.sh - Start Focus Timer">
+
+Start a Pomodoro timer for focused work sessions.
+
+```bash
+#!/bin/bash
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Start Timer
+# @raycast.mode silent
+# @raycast.icon 🍅
+# @raycast.argument1 { "type": "text", "placeholder": "Duration", "optional": true }
+# @raycast.packageName Pomodoro
+# @raycast.description Start a Pomodoro timer
+
+FILENAME="pomodoro_timer_end.txt"
+
+if [ -n "$1" ]; then
+  DURATION_IN_MINUTES="$1"
+else
+  DURATION_IN_MINUTES="20"
+fi
+
+NOW=$(date +"%s")
+END=$(( $NOW + ($DURATION_IN_MINUTES * 60) ))
+echo $END > $FILENAME
+
+echo "Started timer for $DURATION_IN_MINUTES minutes"
+```
+
+**How it works:**
+- Takes optional duration argument (defaults to 20 minutes)
+- Calculates end time as Unix timestamp
+- Stores end time in a text file for status checking
+- Can be paired with a status script that reads the file
+
+**Create companion scripts:**
+- `pomodoro-status.sh` - Read the timer file and display time remaining
+- `pomodoro-stop-timer.sh` - Delete the timer file to cancel
+
+</Accordion>
+
+<Accordion title="pomodoro-status.sh - Check Timer Status">
+
+Display remaining time in your Pomodoro session.
+
+```bash
+#!/bin/bash
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Timer Status
+# @raycast.mode inline
+# @raycast.refreshTime 1m
+# @raycast.icon 🍅
+# @raycast.packageName Pomodoro
+
+FILENAME="pomodoro_timer_end.txt"
+
+if [ ! -f $FILENAME ]; then
+  echo "No timer running"
+  exit 0
+fi
+
+END=$(cat $FILENAME)
+NOW=$(date +"%s")
+REMAINING=$(( $END - $NOW ))
+
+if [ $REMAINING -le 0 ]; then
+  rm $FILENAME
+  echo "⏰ Timer finished!"
+  exit 0
+fi
+
+MINUTES=$(( $REMAINING / 60 ))
+SECONDS=$(( $REMAINING % 60 ))
+
+echo "⏱️ ${MINUTES}m ${SECONDS}s remaining"
+```
+
+**How it works:**
+- Reads end time from timer file
+- Calculates remaining time
+- Displays in menu bar with auto-refresh
+- Automatically cleans up when timer expires
+- Shows alert when timer completes
+
+</Accordion>
+
+## Password Management
+
+Integrate with Bitwarden for secure password access.
+
+<Accordion title="bitwarden/search-vault-items.sh - Search Passwords">
+
+Search your Bitwarden vault and optionally display passwords.
+
+```bash
+#!/bin/bash
+
+# Dependencies:
+#   1. The Bitwarden CLI: https://bitwarden.com/help/article/cli/
+#   2. The `jq` utility: https://stedolan.github.io/jq/
+# Install via homebrew: `brew install bitwarden-cli jq`
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Search Vault Items
+# @raycast.mode fullOutput
+# @raycast.packageName Bitwarden
+# @raycast.icon images/bitwarden.png
+# @raycast.argument1 { "type": "text", "placeholder": "Query" }
+# @raycast.argument2 { "type": "text", "placeholder": "Include Passwords? (y/n)", "optional": true }
+# @raycast.description Search all items in a Bitwarden vault.
+
+if ! command -v bw &> /dev/null; then
+  echo "The Bitwarden CLI is not installed."
+  echo "Install via Homebrew with 'brew install bitwarden-cli'"
+  exit 1
+elif ! command -v jq &> /dev/null; then
+  echo "The jq utility is not installed."
+  echo "Install via Homebrew with 'brew install jq'"
+  exit 1
+fi
+
+token=$(security find-generic-password -a ${USER} -s raycast-bitwarden -w 2> /dev/null)
+token_status=$?
+
+session_args=""
+if [ $token_status -eq 0 ]; then
+  session_args="--session $token"
+fi
+
+bw unlock --check $session_args > /dev/null 2>&1
+unlocked_status=$?
+
+if [ $unlocked_status -ne 0 ]; then
+  echo "Vault is locked. Use the 'Log In' or 'Unlock' commands to enable searching."
+  exit 0
+fi
+
+password=""
+fields=", fields: [[.fields[]? | select(.type != 1)][]? | { name, value }]"
+if [[ -n $2 && $2 == "y" ]]; then
+  password="password: .login.password,"
+  fields=", fields: [.fields[]? | { name, value }]"
+fi
+
+output_format="{ name, username: .login.username, $password uris: [.login.uris[]?.uri], lastUpdated: .revisionDate, notes $fields }"
+bw list items $session_args --search "$1" | jq --color-output "map($output_format)"
+```
+
+**How it works:**
+- Checks for required dependencies (Bitwarden CLI and jq)
+- Retrieves session token from macOS Keychain
+- Verifies vault is unlocked before searching
+- Uses `jq` to format JSON output beautifully
+- Optionally hides passwords (default) or shows them
+- Displays username, URIs, notes, and custom fields
+
+**Security features:**
+- Session token stored securely in Keychain
+- Password display is opt-in via second argument
+- Checks vault lock status before operations
+
+</Accordion>
+
+## Task Management
+
+Create quick-capture workflows for tasks and notes.
+
+<Accordion title="things-create-todo.sh - Quick Task Entry">
+
+Rapidly add tasks to Things with optional scheduling.
+
+```bash
+#!/bin/bash
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Create To-Do
+# @raycast.mode silent
+# @raycast.icon images/things.png
+# @raycast.packageName Things
+# @raycast.argument1 { "type": "text", "placeholder": "Title", "percentEncoded": true }
+# @raycast.argument2 { "type": "text", "placeholder": "Notes", "percentEncoded": true, "optional": true }
+# @raycast.argument3 { "type": "text", "placeholder": "When (e.g. \"today\")", "percentEncoded": true, "optional": true }
+# @raycast.description Create a new To-Do with title and optional deadline.
+
+open "things:///add?title=$1&notes=$2&when=$3"
+echo "Created To-Do"
+```
+
+**How it works:**
+- Uses Things URL scheme for instant task creation
+- Title is required, notes and scheduling are optional
+- `when` parameter supports natural language:
+  - "today", "tomorrow", "evening"
+  - "monday", "next week"
+  - Specific dates: "2024-03-15"
+  - "someday" for Things' Someday list
+
+**Usage examples:**
+- Simple: `Create To-Do "Buy groceries"`
+- With notes: `Create To-Do "Project review" "Check design docs"`
+- Scheduled: `Create To-Do "Call client" "Discuss Q2 plans" "tomorrow"`
+
+</Accordion>
+
+<Accordion title="bear-add-note.sh - Quick Note Capture">
+
+Capture thoughts and notes instantly in Bear.
+
+```bash
+#!/bin/bash
+
+# @raycast.title Add Note
+# @raycast.mode silent
+# @raycast.packageName Bear
+# @raycast.schemaVersion 1
+# @raycast.argument1 { "type": "text", "placeholder": "Title", "percentEncoded": true}
+# @raycast.argument2 { "type": "text", "placeholder": "Content", "optional": true, "percentEncoded": true}
+# @raycast.argument3 { "type": "text", "placeholder": "Use Clipboard?", "optional": true, "percentEncoded": true}
+
+open "bear://x-callback-url/create?title=${1}&clipboard=${3}&text=${2}"
+echo "Note created!"
+```
+
+**How it works:**
+- Creates note with title and optional content
+- Third argument enables clipboard appending
+- Set to "yes" to append clipboard content to note
+- Perfect for saving links, code snippets, or screenshots
+
+**Advanced usage:**
+- Add tags in title: `"Meeting Notes #work #project"`
+- Include markdown in content: `"## Summary\n- Point 1\n- Point 2"`
+- Combine typed and clipboard content for rich notes
+
+</Accordion>
+
+## File & Image Management
+
+<Accordion title="imgur/screenshot-and-imgur.sh - Screenshot to Cloud">
+
+Take a screenshot and instantly upload to Imgur.
+
+```bash
+#!/bin/bash
+
+# Dependency: Requires imgur-screenshot: https://github.com/jomo/imgur-screenshot
+# Install: brew install imgur-screenshot
+
+# @raycast.schemaVersion 1
+# @raycast.title Screenshot and Upload
+# @raycast.mode fullOutput
+# @raycast.packageName Imgur
+# @raycast.icon 📸
+# @raycast.description Take a screenshot and upload to Imgur
+
+if ! command -v imgur-screenshot &> /dev/null; then
+    echo "imgur-screenshot is required."
+    echo "Install with: brew install imgur-screenshot"
+    exit 1
+fi
+
+# Take screenshot
+screencapture -i /tmp/raycast-screenshot.png
+
+# Check if screenshot was taken (user might have cancelled)
+if [ ! -f /tmp/raycast-screenshot.png ]; then
+    echo "Screenshot cancelled"
+    exit 0
+fi
+
+# Upload to Imgur
+echo "Uploading to Imgur..."
+imgur-screenshot /tmp/raycast-screenshot.png
+
+# Clean up
+rm /tmp/raycast-screenshot.png
+
+echo "Screenshot uploaded! URL copied to clipboard."
+```
+
+**How it works:**
+- Uses macOS `screencapture` for interactive screenshot
+- Uploads to Imgur using community tool
+- Automatically copies URL to clipboard
+- Cleans up temporary files
+- Handles user cancellation gracefully
+
+</Accordion>
+
+## Automation Workflows
+
+<Accordion title="OCR Text Recognition">
+
+Extract text from images using OCR.
+
+```bash
+#!/bin/bash
+
+# Dependency: Requires macocr: https://github.com/schappim/macOCR
+# Install: brew install macocr
+
+# @raycast.schemaVersion 1
+# @raycast.title Run OCR on Screenshot
+# @raycast.mode silent
+# @raycast.packageName MacOCR
+# @raycast.icon 👁️
+# @raycast.description Run OCR on the latest screenshot
+
+if ! command -v macocr &> /dev/null; then
+    echo "macocr is required."
+    echo "Install with: brew install macocr"
+    exit 1
+fi
+
+# Find latest screenshot
+LATEST_SCREENSHOT=$(ls -t ~/Desktop/Screenshot*.png | head -1)
+
+if [ -z "$LATEST_SCREENSHOT" ]; then
+    echo "No screenshot found on Desktop"
+    exit 1
+fi
+
+# Run OCR and copy to clipboard
+macocr "$LATEST_SCREENSHOT" | pbcopy
+
+echo "Text extracted and copied to clipboard"
+```
+
+**How it works:**
+- Finds most recent screenshot on Desktop
+- Uses macOS's Vision framework via macocr
+- Extracts text from image
+- Copies recognized text to clipboard
+- Perfect for digitizing printed text, receipts, or handwritten notes
+
+</Accordion>
+
+## Productivity Patterns
+
+<Note>
+**Quick Capture:** The best productivity scripts minimize friction. Scripts like "Add Note" or "Create To-Do" should require minimal input and execute instantly. Save detailed editing for later.
+</Note>
+
+<Tip>
+**Chaining Commands:** Create workflows by chaining multiple scripts:
+1. Take screenshot → Upload to Imgur → Create note with link
+2. Start timer → Set system to Do Not Disturb → Open focus playlist
+3. Complete task → Log time → Update status
+</Tip>
+
+<Warning>
+**Secure Credentials:** For scripts accessing password managers or APIs, always:
+- Store tokens in macOS Keychain (use `security` command)
+- Never hardcode passwords in scripts
+- Check authentication status before operations
+- Provide clear error messages for auth failures
+</Warning>
+
+## Building Workflows
+
+Combine these patterns to create powerful workflows:
+
+### Example: Deep Work Session
+```bash
+#!/bin/bash
+# Start focused work session
+
+# 1. Start Pomodoro timer
+./pomodoro-start-timer.sh 25
+
+# 2. Create task in Things
+open "things:///add?title=Deep Work Session&when=today"
+
+# 3. Start focus playlist
+osascript -e 'tell application "Spotify" to play track "spotify:playlist:37i9dQZF1DWZeKCadgRdKQ"'
+
+# 4. Enable Do Not Disturb (macOS Monterey+)
+shortcuts run "Set Focus" --input "Do Not Disturb"
+
+echo "Focus mode activated! ⚡"
+```
+
+### Example: End of Day Review
+```bash
+#!/bin/bash
+# End of day wrap-up
+
+# 1. Get completed tasks from Things
+# 2. Create daily note in Bear with task summary
+# 3. Log work hours
+# 4. Clear clipboard for security
+
+echo "Daily review created 📝"
+```
+
+## See Also
+
+<CardGroup cols={2}>
+  <Card title="System Scripts" icon="computer" href="/examples/system">
+    Battery, network, and system monitoring
+  </Card>
+  <Card title="Developer Utils" icon="code" href="/examples/developer-utils">
+    Git, Docker, and encoding utilities
+  </Card>
+  <Card title="App Integrations" icon="grid" href="/examples/apps">
+    Control Bear, Spotify, Safari, and more
+  </Card>
+  <Card title="Media Controls" icon="music" href="/examples/media">
+    Music, volume, and playback controls
+  </Card>
+</CardGroup>

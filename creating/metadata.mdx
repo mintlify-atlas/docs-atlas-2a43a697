@@ -1,0 +1,283 @@
+---
+title: "Metadata Reference"
+description: "Complete reference of all @raycast metadata parameters"
+---
+
+Metadata parameters customize how your Script Command appears and behaves in Raycast. All parameters are defined using special comments at the top of your script file.
+
+## Metadata Format
+
+Use the appropriate comment syntax for your language:
+
+<Tabs>
+  <Tab title="Bash/Python/Ruby">
+    ```bash
+    # @raycast.parameterName value
+    ```
+  </Tab>
+  <Tab title="JavaScript/Swift/C#">
+    ```javascript
+    // @raycast.parameterName value
+    ```
+  </Tab>
+</Tabs>
+
+## Required Parameters
+
+These three parameters must be present in every Script Command:
+
+### schemaVersion
+
+<ParamField path="schemaVersion" type="number" required>
+  Schema version to prepare for future changes in the API. Currently, only version `1` is available.
+  
+  **App Version:** 0.29+
+  
+  ```bash
+  # @raycast.schemaVersion 1
+  ```
+</ParamField>
+
+### title
+
+<ParamField path="title" type="string" required>
+  Display name of the Script Command shown in Raycast's root search.
+  
+  **App Version:** 0.29+
+  
+  ```bash
+  # @raycast.title Add Note to Bear
+  ```
+  
+  **Example:** [bear-add-note.sh:5](https://github.com/raycast/script-commands/blob/master/commands/apps/bear/bear-add-note.sh#L5)
+</ParamField>
+
+### mode
+
+<ParamField path="mode" type="string" required>
+  Specifies how the script is executed and how output is presented.
+  
+  **Options:** `silent`, `compact`, `fullOutput`, `inline`
+  
+  **App Version:** 0.29+
+  
+  ```bash
+  # @raycast.mode silent
+  ```
+  
+  See [Output Modes](/creating/output-modes) for detailed explanations of each mode.
+</ParamField>
+
+## Optional Parameters
+
+### packageName
+
+<ParamField path="packageName" type="string">
+  Display name of the package shown as a subtitle in root search. When not provided, the name is inferred from the script directory name.
+  
+  **App Version:** 0.29+
+  
+  ```bash
+  # @raycast.packageName Bear
+  ```
+  
+  **Example:** Groups related scripts together like "System", "Web Searches", or "Baremetrics".
+</ParamField>
+
+### icon
+
+<ParamField path="icon" type="string">
+  Icon displayed in the root search. Can be:
+  - An emoji: `🤖`
+  - A file path (relative or absolute): `images/bear-light.png`
+  - A remote URL (HTTPS only): `https://example.com/icon.png`
+  
+  **Supported formats:** PNG, JPEG
+  
+  **Recommended size:** 64px
+  
+  **App Version:** 0.29+
+  
+  ```bash
+  # @raycast.icon 🛩
+  ```
+  
+  ```bash
+  # @raycast.icon images/baremetrics.png
+  ```
+</ParamField>
+
+### iconDark
+
+<ParamField path="iconDark" type="string">
+  Icon for dark theme. If not specified, `icon` is used for both themes.
+  
+  **App Version:** 1.3.0+
+  
+  ```bash
+  # @raycast.icon images/bear-light.png
+  # @raycast.iconDark images/bear-dark.png
+  ```
+  
+  **Example:** [bear-add-note.sh:11-12](https://github.com/raycast/script-commands/blob/master/commands/apps/bear/bear-add-note.sh#L11-L12)
+</ParamField>
+
+### currentDirectoryPath
+
+<ParamField path="currentDirectoryPath" type="string">
+  Path from which the script is executed. Default is the path of the script.
+  
+  **App Version:** 0.29+
+  
+  ```bash
+  # @raycast.currentDirectoryPath ~
+  ```
+  
+  ```bash
+  # @raycast.currentDirectoryPath ~/Projects/my-app
+  ```
+</ParamField>
+
+### needsConfirmation
+
+<ParamField path="needsConfirmation" type="boolean">
+  Shows a confirmation alert dialog before running the script. Helpful for destructive operations like "Quit All Apps" or "Empty Trash".
+  
+  **Default:** `false`
+  
+  **App Version:** 0.30+
+  
+  ```bash
+  # @raycast.needsConfirmation true
+  ```
+</ParamField>
+
+### refreshTime
+
+<ParamField path="refreshTime" type="string">
+  Refresh interval for `inline` mode scripts. Specify in seconds (s), minutes (m), hours (h), or days (d).
+  
+  **Minimum:** 10 seconds
+  
+  **Examples:** `10s`, `1m`, `12h`, `1d`
+  
+  **App Version:** 0.31+
+  
+  **Required for inline mode**
+  
+  ```bash
+  # @raycast.mode inline
+  # @raycast.refreshTime 10s
+  ```
+  
+  **Example:** [inline-cpu-usage-percent.sh:8](https://github.com/raycast/script-commands/blob/master/commands/system/inline-cpu-usage-percent.sh#L8)
+</ParamField>
+
+<Note>
+  If you have more than 10 inline commands, only the first 10 will refresh automatically. The rest must be manually refreshed by navigating to them and pressing Return.
+</Note>
+
+### argument1, argument2, argument3
+
+<ParamField path="argument[1-3]" type="JSON">
+  Custom arguments for user input. Supports text, password, and dropdown fields.
+  
+  **Maximum arguments:** 3
+  
+  **App Version:** 1.2.0+
+  
+  ```bash
+  # @raycast.argument1 { "type": "text", "placeholder": "Title" }
+  ```
+  
+  See [Arguments](/creating/arguments) for complete documentation.
+</ParamField>
+
+## Documentation Parameters
+
+These parameters are used for documentation and community sharing:
+
+### description
+
+<ParamField path="description" type="string">
+  Brief description of what the script command does.
+  
+  ```bash
+  # @raycast.description Display CPU usage percent
+  ```
+</ParamField>
+
+### author
+
+<ParamField path="author" type="string">
+  Author name for documentation.
+  
+  ```bash
+  # @raycast.author Tanay Nistala
+  ```
+</ParamField>
+
+### authorURL
+
+<ParamField path="authorURL" type="string">
+  Author's social media, website, or contact information.
+  
+  ```bash
+  # @raycast.authorURL https://github.com/tanaynistala
+  ```
+</ParamField>
+
+## Complete Example
+
+Here's a full example combining multiple metadata parameters:
+
+```bash
+#!/bin/bash
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Add Note
+# @raycast.mode silent
+
+# Optional parameters:
+# @raycast.icon images/bear-light.png
+# @raycast.iconDark images/bear-dark.png
+# @raycast.packageName Bear
+# @raycast.argument1 { "type": "text", "placeholder": "Title", "percentEncoded": true}
+# @raycast.argument2 { "type": "text", "placeholder": "Content", "optional": true, "percentEncoded": true}
+
+# Documentation:
+# @raycast.description Add a new note to Bear.
+# @raycast.author Tanay Nistala
+# @raycast.authorURL https://github.com/tanaynistala
+
+open "bear://x-callback-url/create?title=${1}&text=${2}"
+
+echo "Note created!"
+```
+
+**See the full example:** [bear-add-note.sh](https://github.com/raycast/script-commands/blob/master/commands/apps/bear/bear-add-note.sh)
+
+## Troubleshooting
+
+### Script Not Appearing in Raycast?
+
+<Steps>
+  <Step title="Check Filename">
+    Ensure the filename doesn't contain `.template.` Remove this from the filename once you've configured the script.
+  </Step>
+  
+  <Step title="Verify Required Parameters">
+    Confirm all three required parameters (`schemaVersion`, `title`, `mode`) are present.
+  </Step>
+  
+  <Step title="Check Comment Syntax">
+    Ensure you're using the correct comment syntax:
+    - `#` for Bash, Python, Ruby, PHP
+    - `//` for JavaScript, Swift, C#
+  </Step>
+  
+  <Step title="Start from Template">
+    If nothing works, start from a [template](/creating/templates) or copy an example from the [community repository](https://github.com/raycast/script-commands/tree/master/commands).
+  </Step>
+</Steps>

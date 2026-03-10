@@ -1,0 +1,220 @@
+---
+title: "Script Command Basics"
+description: "Learn how to create your first Raycast Script Command"
+---
+
+Script Commands let you execute scripts from anywhere on your desktop with just a few keystrokes. They're perfect for automating everyday tasks like converting data, opening bookmarks, or triggering development workflows.
+
+## Creating Your First Script Command
+
+Raycast includes a built-in creator that helps you get started quickly.
+
+<Steps>
+  <Step title="Use the Create Script Command">
+    Open Raycast and search for "Create Script Command". This will guide you through creating a new script.
+  </Step>
+
+  <Step title="Choose Your Language">
+    Select from supported languages:
+    - Bash
+    - Python
+    - JavaScript/Node.js
+    - Swift
+    - Ruby
+    - PHP
+    - AppleScript
+    - C#/.NET
+  </Step>
+
+  <Step title="Edit Your Script">
+    Open the generated script file in your favorite code editor and customize it.
+  </Step>
+
+  <Step title="Run Your Script">
+    Return to Raycast and search for your script by its title to execute it.
+  </Step>
+</Steps>
+
+<Note>
+  If you're writing Bash scripts, we highly recommend using [ShellCheck](https://www.shellcheck.net/) to catch syntax errors and ensure smooth execution.
+</Note>
+
+## File Structure
+
+A Script Command is a standard executable script file with special metadata comments at the top. Here's the basic structure:
+
+<CodeGroup>
+```bash Bash
+#!/bin/bash
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title My First Script
+# @raycast.mode fullOutput
+
+# Optional parameters:
+# @raycast.icon 🤖
+# @raycast.packageName Raycast Scripts
+
+echo "Hello from My First Script"
+```
+
+```python Python
+#!/usr/bin/env python3
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title My First Script
+# @raycast.mode fullOutput
+
+# Optional parameters:
+# @raycast.icon 🤖
+# @raycast.packageName Raycast Scripts
+
+print("Hello World!")
+```
+
+```javascript JavaScript
+#!/usr/bin/env node
+
+// Required parameters:
+// @raycast.schemaVersion 1
+// @raycast.title My First Script
+// @raycast.mode fullOutput
+
+// Optional parameters:
+// @raycast.icon 🤖
+// @raycast.packageName Raycast Scripts
+
+console.log("Hello World!")
+```
+
+```swift Swift
+#!/usr/bin/swift
+
+// Required parameters:
+// @raycast.schemaVersion 1
+// @raycast.title My First Script
+// @raycast.mode fullOutput
+
+// Optional parameters:
+// @raycast.icon 🤖
+// @raycast.packageName Raycast Scripts
+
+print("Hello from My First Script")
+```
+</CodeGroup>
+
+## Shebang Lines
+
+The shebang line (first line starting with `#!`) tells the system how to execute your script. Use the appropriate shebang for your language:
+
+| Language | Shebang |
+|----------|----------|
+| Bash | `#!/bin/bash` |
+| Python | `#!/usr/bin/env python3` |
+| JavaScript | `#!/usr/bin/env node` |
+| Swift | `#!/usr/bin/swift` |
+| Ruby | `#!/usr/bin/env ruby` |
+| PHP | `#!/usr/bin/env php` |
+| AppleScript | `#!/usr/bin/osascript` |
+| C#/.NET | `#!/usr/bin/env dotnet` |
+
+<Note>
+  For login shell execution in Bash, you can add the `-l` flag: `#!/bin/bash -l`
+  
+  Raycast automatically appends `/usr/local/bin` to the `$PATH` variable, but you can extend it by adding `export PATH='/some/extra/path:$PATH'` at the top of your script.
+</Note>
+
+## Metadata Comments
+
+Metadata is defined using special comments:
+- Use `#` for Bash, Python, Ruby, and PHP
+- Use `//` for JavaScript, Swift, and C#
+
+All metadata parameters start with `@raycast.` and follow the format:
+```bash
+# @raycast.parameterName value
+```
+
+### Required Metadata
+
+Every script command must include these three parameters:
+
+<ParamField path="schemaVersion" type="number" required>
+  Schema version for future API compatibility. Currently, only version `1` is available.
+  
+  ```bash
+  # @raycast.schemaVersion 1
+  ```
+</ParamField>
+
+<ParamField path="title" type="string" required>
+  Display name shown in Raycast's root search.
+  
+  ```bash
+  # @raycast.title My First Script
+  ```
+</ParamField>
+
+<ParamField path="mode" type="string" required>
+  How the script executes and presents output. Options: `silent`, `compact`, `fullOutput`, or `inline`.
+  
+  ```bash
+  # @raycast.mode fullOutput
+  ```
+  
+  Learn more in [Output Modes](/creating/output-modes).
+</ParamField>
+
+## Installing Script Directories
+
+To make your scripts available in Raycast:
+
+<Steps>
+  <Step title="Open Raycast Preferences">
+    Navigate to the Extensions tab.
+  </Step>
+
+  <Step title="Add Script Directory">
+    Click the plus button and select "Add Script Directory".
+  </Step>
+
+  <Step title="Select Your Directory">
+    Choose the directory containing your Script Commands.
+  </Step>
+</Steps>
+
+<Note>
+  Scripts with `.template.` in the filename won't appear in Raycast. Remove this from the filename once you've configured any required values.
+</Note>
+
+## Error Handling
+
+If your script exits with a non-zero status code, Raycast displays an error toast. For `inline` and `compact` modes, the last line of output becomes the error message:
+
+```bash
+if ! [[ $value =~ $regex ]] ; then
+  echo "Invalid value provided"
+  exit 1
+else
+  # Process the value
+fi
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Metadata Reference" icon="gear" href="/creating/metadata">
+    Explore all available metadata parameters
+  </Card>
+  <Card title="Output Modes" icon="display" href="/creating/output-modes">
+    Learn about different output presentation modes
+  </Card>
+  <Card title="Arguments" icon="input-text" href="/creating/arguments">
+    Add custom input fields to your scripts
+  </Card>
+  <Card title="Templates" icon="file-code" href="/creating/templates">
+    Start from ready-made templates
+  </Card>
+</CardGroup>

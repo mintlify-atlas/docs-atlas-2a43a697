@@ -1,0 +1,381 @@
+---
+title: Media Controls
+description: Script examples for controlling music playback, volume, and media applications
+icon: 'music'
+---
+
+These examples show how to create script commands for controlling media playback across different applications like Apple Music, Spotify, and system audio.
+
+## Apple Music Playback
+
+Control Apple Music directly from Raycast.
+
+<Accordion title="apple-music-current-track.applescript - Display Now Playing">
+
+Show the currently playing track in your Raycast menu bar with auto-refresh.
+
+```applescript
+#!/usr/bin/osascript
+
+# @raycast.schemaVersion 1
+# @raycast.title Current Track
+# @raycast.mode inline
+# @raycast.refreshTime 10s
+# @raycast.packageName Music
+# @raycast.icon images/apple-music-logo.png
+# @raycast.description Show currently playing track in Music.
+
+if application "Music" is not running then
+    log "Not playing"
+    return
+end if
+
+property currentTrackName : "Unknown Track"
+property currentTrackArtist : "Unknown Artist"
+property playerState : "stopped"
+
+tell application "Music"
+    try
+        set currentTrackName to name of the current track
+        set currentTrackArtist to artist of the current track
+        set playerState to player state as string
+    end try
+end tell
+
+if playerState is "playing" then
+    log currentTrackName & " - " & currentTrackArtist
+else if playerState is "paused" then
+    log currentTrackName & " - " & currentTrackArtist & " (Paused)"
+else
+    log "Not playing"
+end if
+```
+
+**How it works:**
+- Checks if Music app is running before attempting to query it
+- Uses AppleScript's `tell application` to communicate with Music
+- Gets current track name, artist, and player state
+- Updates every 10 seconds when displayed in menu bar
+- Shows playback state (Playing/Paused) for context
+
+</Accordion>
+
+<Accordion title="apple-music-volume-up.applescript - Increase Volume">
+
+Quickly increase Apple Music volume by 5%.
+
+```applescript
+#!/usr/bin/osascript
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Apple Music Volume Up
+# @raycast.mode silent
+# @raycast.icon images/apple-music-logo.png
+# @raycast.packageName Music
+
+try
+    tell application "Music"
+        set sound volume to sound volume + 5
+        do shell script "echo '⬆'"
+    end tell
+end try
+```
+
+**How it works:**
+- Adjusts Music app's internal volume (separate from system volume)
+- Increases by 5 points per execution
+- Runs in silent mode with just an arrow indicator
+- Uses `try` block to handle cases where Music isn't running
+- Can be triggered repeatedly for fine-grained control
+
+**Create a companion script:** Make a volume-down version by changing `+ 5` to `- 5` and the arrow to `⬇`.
+
+</Accordion>
+
+## Spotify Integration
+
+<Accordion title="spotify-current-track.applescript - Show Playing Track">
+
+Display what's currently playing on Spotify.
+
+```applescript
+#!/usr/bin/osascript
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Current Track
+# @raycast.mode inline
+# @raycast.refreshTime 30s
+# @raycast.packageName Spotify
+# @raycast.icon images/spotify-logo.png
+# @raycast.description Show currently playing track in Spotify.
+
+if application "Spotify" is not running then
+    log "Not playing"
+    return
+end if
+
+property currentTrackName : "Unknown Track"
+property currentTrackArtist : "Unknown Artist"
+property playerState : "stopped"
+
+tell application "Spotify"
+    try
+        set currentTrackName to name of the current track
+        set currentTrackArtist to artist of the current track
+        set playerState to player state as string
+    end try
+end tell
+
+if playerState is "playing" then
+    log currentTrackName & " by " & currentTrackArtist
+else if playerState is "paused" then
+    log currentTrackName & " by " & currentTrackArtist & " (Paused)"
+else
+    log "Not playing"
+end if
+```
+
+**How it works:**
+- Similar to Apple Music script but targets Spotify
+- Refreshes every 30 seconds
+- Handles cases where Spotify is not running
+- Displays track and artist with "by" separator
+- Perfect for menu bar display
+
+</Accordion>
+
+## Universal Media Scripts
+
+These patterns work across multiple media players.
+
+<Accordion title="Creating Play/Pause Controls">
+
+Create universal play/pause controls for any media app.
+
+<CodeGroup>
+
+```applescript Apple Music
+#!/usr/bin/osascript
+
+# @raycast.schemaVersion 1
+# @raycast.title Play/Pause
+# @raycast.mode silent
+# @raycast.packageName Music
+
+tell application "Music"
+    playpause
+end tell
+```
+
+```applescript Spotify
+#!/usr/bin/osascript
+
+# @raycast.schemaVersion 1
+# @raycast.title Play/Pause
+# @raycast.mode silent
+# @raycast.packageName Spotify
+
+tell application "Spotify"
+    playpause
+end tell
+```
+
+</CodeGroup>
+
+**How it works:**
+- Uses the universal `playpause` command available in most media apps
+- Toggles between play and pause states
+- Works even when the app is in the background
+- Silent mode for instant execution without UI
+
+</Accordion>
+
+<Accordion title="Next/Previous Track Controls">
+
+Skip tracks forward or backward.
+
+<CodeGroup>
+
+```applescript Next Track
+#!/usr/bin/osascript
+
+# @raycast.schemaVersion 1
+# @raycast.title Next Track
+# @raycast.mode silent
+# @raycast.packageName Music
+
+tell application "Music"
+    next track
+end tell
+```
+
+```applescript Previous Track
+#!/usr/bin/osascript
+
+# @raycast.schemaVersion 1
+# @raycast.title Previous Track
+# @raycast.mode silent
+# @raycast.packageName Music
+
+tell application "Music"
+    previous track
+end tell
+```
+
+</CodeGroup>
+
+**How it works:**
+- `next track` and `previous track` are standard AppleScript commands
+- Work with Apple Music, Spotify, and most media players
+- Execute instantly in silent mode
+- Can be bound to keyboard shortcuts for quick access
+
+</Accordion>
+
+## Volume Management
+
+<Accordion title="Fine-Grained Volume Control">
+
+Create custom volume adjustments for precise control.
+
+```applescript
+#!/usr/bin/osascript
+
+# @raycast.schemaVersion 1
+# @raycast.title Set Volume
+# @raycast.mode silent
+# @raycast.packageName Music
+# @raycast.argument1 { "type": "text", "placeholder": "Volume (0-100)" }
+
+on run argv
+    set volumeLevel to item 1 of argv as number
+    
+    if volumeLevel < 0 or volumeLevel > 100 then
+        display notification "Volume must be between 0 and 100" with title "Invalid Volume"
+        return
+    end if
+    
+    tell application "Music"
+        set sound volume to volumeLevel
+    end tell
+    
+    display notification "Volume set to " & volumeLevel with title "Music Volume"
+end run
+```
+
+**How it works:**
+- Takes volume level as argument (0-100)
+- Validates input is within acceptable range
+- Sets Music app volume directly
+- Provides notification feedback
+- More precise than increment/decrement buttons
+
+</Accordion>
+
+## Advanced Media Controls
+
+<Accordion title="Love/Hate Current Track">
+
+Rate tracks directly from Raycast.
+
+```applescript
+#!/usr/bin/osascript
+
+# @raycast.schemaVersion 1
+# @raycast.title Love Current Track
+# @raycast.mode silent
+# @raycast.packageName Music
+
+tell application "Music"
+    if player state is playing then
+        set loved of current track to true
+        set trackName to name of current track
+        display notification "Loved " & trackName with title "Apple Music"
+    else
+        display notification "No track is currently playing" with title "Apple Music"
+    end if
+end tell
+```
+
+**How it works:**
+- Checks if a track is currently playing
+- Sets the `loved` property of the current track
+- Shows notification with track name
+- Integrates with Apple Music's recommendation algorithm
+- Can create similar script for "hate" by setting `loved` to `false`
+
+</Accordion>
+
+## System Audio Controls
+
+<Accordion title="Toggle System Mute">
+
+Quickly mute/unmute system audio.
+
+```applescript
+#!/usr/bin/osascript
+
+# @raycast.schemaVersion 1
+# @raycast.title Toggle Mute
+# @raycast.mode silent
+# @raycast.packageName System
+# @raycast.icon 🔇
+
+set currentVolume to output volume of (get volume settings)
+set isMuted to output muted of (get volume settings)
+
+if isMuted then
+    set volume output volume currentVolume without output muted
+    display notification "Audio unmuted" with title "System Audio"
+else
+    set volume output volume currentVolume with output muted
+    display notification "Audio muted" with title "System Audio"
+end if
+```
+
+**How it works:**
+- Gets current system volume and mute state
+- Toggles mute while preserving volume level
+- Provides clear feedback via notifications
+- Works system-wide, affecting all applications
+
+</Accordion>
+
+## Media Script Patterns
+
+<Note>
+**Inline vs Silent Mode:** Use `inline` mode for status displays (now playing) and `silent` mode for actions (play/pause, next track). This gives users appropriate feedback without interrupting their workflow.
+</Note>
+
+<Tip>
+**Keyboard Shortcuts:** Bind your most-used media controls to keyboard shortcuts in Raycast settings. For example, `Cmd+Shift+Space` for play/pause or `Cmd+Shift+Right` for next track.
+</Tip>
+
+<Warning>
+**App-Specific Commands:** Commands like `loved` and `sound volume` are specific to Apple Music. Spotify and other players have different properties. Check each app's AppleScript dictionary in Script Editor.
+</Warning>
+
+## Testing Media Scripts
+
+1. **Use Script Editor:** Open Script Editor (in /Applications/Utilities) to test AppleScript commands interactively
+2. **Check App Dictionary:** In Script Editor, go to File > Open Dictionary to see available commands for each app
+3. **Handle Edge Cases:** Always check if the app is running and if media is playing before executing commands
+
+## See Also
+
+<CardGroup cols={2}>
+  <Card title="System Scripts" icon="computer" href="/examples/system">
+    Battery, network, and system monitoring
+  </Card>
+  <Card title="Developer Utils" icon="code" href="/examples/developer-utils">
+    Git, Docker, and encoding utilities
+  </Card>
+  <Card title="App Integrations" icon="grid" href="/examples/apps">
+    Control Bear, Spotify, Safari, and more
+  </Card>
+  <Card title="Productivity" icon="check" href="/examples/productivity">
+    Todo lists, timers, and password managers
+  </Card>
+</CardGroup>

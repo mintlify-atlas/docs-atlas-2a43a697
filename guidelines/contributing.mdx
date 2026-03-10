@@ -1,0 +1,290 @@
+---
+title: Contributing Guidelines
+description: Learn how to contribute Script Commands to the Raycast community repository
+icon: git-pull-request
+---
+
+Thank you for your interest in contributing to Raycast Script Commands! This guide will help you understand the standards and practices for submitting high-quality script commands.
+
+## Git and Pull Requests
+
+Follow these guidelines to ensure smooth collaboration:
+
+<Note>
+Make sure your pull request is focused and easy to review. Fill in the pull request template and avoid combining multiple complex Script Commands in a single PR.
+</Note>
+
+### Branch and Commit Guidelines
+
+<Steps>
+  <Step title="Keep history clean">
+    Rebase your branch on top of master to allow fast-forward merges back to master.
+  </Step>
+  
+  <Step title="Use descriptive commit messages">
+    Write clear commit messages with proper spelling. Squash any "fix typo" or minor commits on your end before submitting.
+  </Step>
+  
+  <Step title="Make focused changes">
+    Keep your pull request focused on a single feature or fix. Avoid creating PRs with multiple unrelated Script Commands.
+  </Step>
+</Steps>
+
+## Folder Structure
+
+Organize your scripts in a logical directory structure that makes sense for users.
+
+### Bundle Related Scripts
+
+Try to bundle scripts that are related in a directory or sub-directory. **Avoid having generic folders** with lots of different commands.
+
+<Note>
+**Why this matters:** To avoid automatically including scripts that people may not be interested in. For example, if you're using Spotify scripts, there's a lower chance you'll need Apple Music scripts.
+</Note>
+
+**Good structure:**
+```
+. commands
+└─ media
+   ├─ spotify
+   ├─ apple-music
+   └─ youtube
+```
+
+**Poor structure:**
+```
+. commands
+└─ media  (contains all media service scripts mixed together)
+```
+
+### Image Organization
+
+Images should go into a dedicated `images` folder within your script directory:
+
+```
+. commands
+└─ media
+   └─ spotify
+      ├─ images
+      │  └─ spotify-logo.png
+      ├─ spotify-next-track.applescript
+      └─ spotify-prev-track.applescript
+```
+
+## Naming Conventions
+
+### English Style Convention
+
+Use **American English** spelling and style for all command metadata.
+
+<Note>
+To verify you're using the correct spelling, refer to [Wikipedia's comparison](https://en.wikipedia.org/wiki/Comparison_of_American_and_British_English) or use a [British to American English Converter](https://www.infoenglish.net/british-to-american-english/).
+</Note>
+
+### File Naming Convention
+
+Use **lowercased, dash-case format** for script files and directories, with proper file extensions:
+
+- AppleScript: `.applescript`
+- Swift: `.swift`
+- Bash: `.sh`
+- Python: `.py`
+- Node.js: `.js`
+
+**Examples:**
+- ✅ `spotify-next-track.applescript`
+- ✅ `github-notifications.sh`
+- ❌ `SpotifyNextTrack.applescript`
+- ❌ `github_notifications.sh`
+
+## Metadata Requirements
+
+### Title
+
+Raycast's UI adopts **title-cased strings** for all command titles as per Apple's Human Interface Guidelines.
+
+**Examples:**
+- ✅ "Toggle Hidden Files"
+- ✅ "Check GitHub Notifications"
+- ❌ "Toggle hidden files"
+- ❌ "check github notifications"
+
+### Mode Selection
+
+Choose the appropriate mode for your script:
+
+- **`silent`** - For instant commands (e.g., "Toggle Hidden Files")
+- **`compact`** - For long-running tasks like network requests
+- **`fullOutput`** - For commands that print detailed information
+- **`inline`** - For dashboard items (e.g., "Current Weather")
+
+### Package Name
+
+<Warning>
+While `packageName` is optional in Raycast (it will derive it from the directory name), **it is required in this repository** to improve portability. Always provide it in your script commands.
+</Warning>
+
+## Scripts Requiring Additional Modification
+
+For scripts that need user configuration before use:
+
+<Steps>
+  <Step title="Add clear instructions">
+    Include comments at the top explaining how to configure the script (e.g., API tokens, usernames, parameters).
+  </Step>
+  
+  <Step title="Use template naming">
+    Add `.template.` to the filename. This prevents Raycast from automatically parsing the script.
+  </Step>
+  
+  <Step title="Document the setup process">
+    Explain that users need to copy the file and remove `.template.` from the filename after configuration.
+  </Step>
+</Steps>
+
+**Example:** `github-notifications.template.sh`
+
+## Dependency Management
+
+### When to Use Dependencies
+
+Most scripts should be written in Bash or AppleScript. While Swift and Node runtimes are allowed, always check if there's a strong need since they don't come pre-installed on macOS.
+
+<Warning>
+Remember: Non-technical users may not want to install a Node runtime just to perform a simple function.
+</Warning>
+
+### Guidelines for Dependencies
+
+<AccordionGroup>
+  <Accordion title="Can you avoid dependencies?">
+    First, ask yourself if you can build the Script Command without any dependencies. Less or no dependencies make it easier for others to adopt your command and make it more portable.
+  </Accordion>
+  
+  <Accordion title="Deep vs. Shallow dependencies">
+    - **Deep dependency:** Hides complex functionality behind a simple interface (acceptable)
+    - **Shallow dependency:** Adds minimal value for the code required (avoid these)
+    
+    Check whether there are built-in Unix tools (curl, awk, sed, etc.) that can solve the same problem without much code.
+  </Accordion>
+  
+  <Accordion title="Consider security implications">
+    Think about transitive dependencies and security aspects. The npm ecosystem, for instance, has been notorious for pulling in dependencies for trivial tasks, sometimes exposing users to security issues.
+  </Accordion>
+</AccordionGroup>
+
+### If You Need a Dependency
+
+If a dependency is truly necessary, follow these guidelines:
+
+<Steps>
+  <Step title="Document the dependency">
+    Add a comment section at the top of the file explicitly stating the dependency and how to install it:
+    
+    ```bash
+    #!/bin/bash
+
+    # Dependency: This script requires `jq` cli installed: https://stedolan.github.io/jq/
+    # Install via homebrew: `brew install jq`
+
+    # @raycast.schemaVersion 1
+    # @raycast.title Prettify JSON from Clipboard
+    ```
+  </Step>
+  
+  <Step title="Add dependency checking">
+    Include code that handles missing dependencies gracefully:
+    
+    ```bash
+    if ! command -v jq &> /dev/null; then
+        echo "jq command is required (https://stedolan.github.io/jq/).";
+        exit 1;
+    fi
+    ```
+  </Step>
+</Steps>
+
+## Scripts Requiring Apps
+
+Some scripts control applications and require them to be installed. Make sure to document this requirement:
+
+```bash
+#!/bin/bash
+
+# Note: Plash v2.2.0 required
+# Install via Mac App Store: https://apps.apple.com/app/id1494023538
+
+# @raycast.schemaVersion 1
+# @raycast.title Toggle Plash
+```
+
+<Note>
+Include both the app requirement and installation instructions at the top of your script.
+</Note>
+
+## Bash Profiles and Environment Variables
+
+<Warning>
+**Important:** All Script Commands are executed in a non-login shell. We do not allow Script Commands that make use of login shells (e.g., `#!/bin/bash -l`) in this repository.
+</Warning>
+
+### Why This Restriction?
+
+This policy ensures:
+- Easy portability across different systems
+- Explicit injection of information
+- Best performance
+- No unexpected behavior from user-specific profiles
+
+### Path Configuration
+
+Raycast automatically appends `/usr/local/bin` to the `$PATH` variable. If you need additional paths, you can extend `$PATH` at the top of your script:
+
+```bash
+export PATH='/some/extra/path:$PATH'
+```
+
+<Note>
+Raycast has support for environment variables. Track progress in [this issue](https://github.com/raycast/script-commands/issues/77).
+</Note>
+
+## Auto-Generated Files
+
+<Warning>
+**Do not modify these files manually.** All changes will be lost when the integration workflow runs.
+</Warning>
+
+The following files are auto-generated by the Toolkit after each commit:
+
+- `commands/README.md`
+- `commands/extensions.json`
+
+The information used to fill these files is collected from the Script Commands in the repository. No manual changes are necessary.
+
+## Examples to Get Started
+
+Here are some great examples from the repository:
+
+<CardGroup cols={2}>
+  <Card title="Apple Music Play" icon="music">
+    An AppleScript to start playing music.
+    
+    `commands/media/apple-music/apple-music-play.applescript`
+  </Card>
+  
+  <Card title="Sentry Unresolved Issues" icon="bug">
+    A Python script that fetches information from an API and parses the JSON response.
+    
+    `commands/developer-utils/sentry/sentry-unresolved-issues.template.py`
+  </Card>
+  
+  <Card title="Slack Set Status" icon="message">
+    A Bash script that sends a JSON payload with cURL.
+    
+    `commands/communication/slack/set-slack-status.template.sh`
+  </Card>
+</CardGroup>
+
+## Community
+
+Join our [Slack community](https://www.raycast.com/community) to brainstorm ideas with like-minded developers and get help with your contributions!

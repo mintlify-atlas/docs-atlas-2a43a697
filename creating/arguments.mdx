@@ -1,0 +1,508 @@
+---
+title: "Arguments"
+description: "Add custom input fields to your Script Commands"
+---
+
+Arguments enable users to provide input when running your Script Command. Use them to create interactive scripts that search, configure, or process custom data.
+
+## Quick Start
+
+Define arguments using JSON in your script's metadata:
+
+```bash
+#!/bin/bash
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Search Flights
+# @raycast.mode silent
+
+# Optional parameters:
+# @raycast.icon 🛩
+# @raycast.packageName Web Searches
+# @raycast.argument1 { "type": "text", "placeholder": "from city", "percentEncoded": true }
+# @raycast.argument2 { "type": "text", "placeholder": "to city", "optional": true, "percentEncoded": true }
+
+open "https://www.google.com/search?q=flights%20from%20$1%20to%20$2"
+```
+
+<Note>
+  **Pro tip:** Type your script's alias followed by a space, and Raycast will automatically focus the first input field.
+</Note>
+
+## Argument Metadata
+
+Use `argument1`, `argument2`, and `argument3` metadata parameters to define up to 3 arguments per script.
+
+```bash
+# @raycast.argument1 { "type": "text", "placeholder": "Title" }
+# @raycast.argument2 { "type": "password", "placeholder": "API Key" }
+# @raycast.argument3 { "type": "dropdown", "placeholder": "Priority", "data": [...] }
+```
+
+<Warning>
+  Maximum of 3 arguments per script. If you need more, please share your use case in the [Slack community](https://www.raycast.com/community).
+</Warning>
+
+## Argument Types
+
+Raycast supports three argument types:
+
+### Text
+
+Standard text input field.
+
+```bash
+# @raycast.argument1 { "type": "text", "placeholder": "Enter your query" }
+```
+
+**Example:** [bear-add-note.sh:16](https://github.com/raycast/script-commands/blob/master/commands/apps/bear/bear-add-note.sh#L16)
+
+```bash
+# @raycast.argument1 { "type": "text", "placeholder": "Title", "percentEncoded": true}
+```
+
+### Password
+
+Secure input field that masks entered text with asterisks. Perfect for API keys, tokens, or sensitive data.
+
+```bash
+# @raycast.argument1 { "type": "password", "placeholder": "API Key" }
+```
+
+**App Version:** 1.64.0+
+
+**Example:** [iconsur.sh:14](https://github.com/raycast/script-commands/blob/master/commands/apps/iconsur/iconsur.sh#L14)
+
+```bash
+# @raycast.argument2 { "type": "password", "placeholder": "Root Password", "optional": true }
+```
+
+<Note>
+  The deprecated `"secure": true` property has been replaced by `"type": "password"` since version 1.64.0.
+</Note>
+
+### Dropdown
+
+Selection menu with predefined options.
+
+```bash
+# @raycast.argument1 { "type": "dropdown", "placeholder": "Position", "data": [{"title": "Left", "value": "left"}, {"title": "Right", "value": "right"}] }
+```
+
+**App Version:** 1.64.0+
+
+**Example:** [dock-set-position.sh:10](https://github.com/raycast/script-commands/blob/master/commands/system/dock-set-position.sh#L10)
+
+```bash
+# @raycast.argument1 { 
+#   "type": "dropdown", 
+#   "placeholder": "Position on Screen", 
+#   "data": [
+#     {"title": "Left", "value": "left"}, 
+#     {"title": "Right", "value": "right"}, 
+#     {"title": "Bottom", "value": "bottom"}
+#   ]
+# }
+```
+
+## Field Properties
+
+All argument fields support these properties:
+
+<ParamField path="type" type="string" required>
+  The argument type: `text`, `password`, or `dropdown`.
+  
+  **App Version:** 1.64.0+ (for password and dropdown)
+  
+  ```json
+  { "type": "text" }
+  ```
+</ParamField>
+
+<ParamField path="placeholder" type="string" required>
+  Placeholder text shown in the input field.
+  
+  **App Version:** 1.2.0+
+  
+  ```json
+  { "type": "text", "placeholder": "Enter city name" }
+  ```
+</ParamField>
+
+<ParamField path="optional" type="boolean">
+  Set to `true` to make the argument optional. When `false` or omitted, Raycast won't execute the script until the field is filled.
+  
+  **Default:** `false`
+  
+  **App Version:** 1.3.0+
+  
+  ```json
+  { "type": "text", "placeholder": "Optional notes", "optional": true }
+  ```
+</ParamField>
+
+<ParamField path="percentEncoded" type="boolean">
+  Set to `true` to automatically percent-encode the argument value before passing it to the script. Useful for URL parameters.
+  
+  **Default:** `false`
+  
+  **App Version:** 1.4.0+
+  
+  ```json
+  { "type": "text", "placeholder": "Search term", "percentEncoded": true }
+  ```
+</ParamField>
+
+<ParamField path="data" type="array">
+  Array of options for dropdown type. Each object must have `title` and `value` properties.
+  
+  **Required when:** `type` is `dropdown`
+  
+  **App Version:** 1.64.0+
+  
+  ```json
+  {
+    "type": "dropdown",
+    "placeholder": "Choose priority",
+    "data": [
+      {"title": "High", "value": "high"},
+      {"title": "Medium", "value": "medium"},
+      {"title": "Low", "value": "low"}
+    ]
+  }
+  ```
+</ParamField>
+
+## Accessing Arguments in Scripts
+
+Arguments are passed to your script as positional parameters:
+
+<Tabs>
+  <Tab title="Bash">
+    ```bash
+    #!/bin/bash
+    
+    # @raycast.argument1 { "type": "text", "placeholder": "Name" }
+    # @raycast.argument2 { "type": "text", "placeholder": "Age" }
+    
+    NAME=$1
+    AGE=$2
+    
+    echo "Hello, $NAME! You are $AGE years old."
+    ```
+  </Tab>
+  
+  <Tab title="Python">
+    ```python
+    #!/usr/bin/env python3
+    
+    # @raycast.argument1 { "type": "text", "placeholder": "Name" }
+    # @raycast.argument2 { "type": "text", "placeholder": "Age" }
+    
+    import sys
+    
+    name = sys.argv[1]
+    age = sys.argv[2]
+    
+    print(f"Hello, {name}! You are {age} years old.")
+    ```
+  </Tab>
+  
+  <Tab title="JavaScript">
+    ```javascript
+    #!/usr/bin/env node
+    
+    // @raycast.argument1 { "type": "text", "placeholder": "Name" }
+    // @raycast.argument2 { "type": "text", "placeholder": "Age" }
+    
+    const [name, age] = process.argv.slice(2)
+    
+    console.log(`Hello, ${name}! You are ${age} years old.`)
+    ```
+  </Tab>
+  
+  <Tab title="Ruby">
+    ```ruby
+    #!/usr/bin/env ruby
+    
+    # @raycast.argument1 { "type": "text", "placeholder": "Name" }
+    # @raycast.argument2 { "type": "text", "placeholder": "Age" }
+    
+    name = ARGV[0]
+    age = ARGV[1]
+    
+    puts "Hello, #{name}! You are #{age} years old."
+    ```
+  </Tab>
+  
+  <Tab title="Swift">
+    ```swift
+    #!/usr/bin/swift
+    
+    // @raycast.argument1 { "type": "text", "placeholder": "Name" }
+    // @raycast.argument2 { "type": "text", "placeholder": "Age" }
+    
+    let name = CommandLine.arguments[1]
+    let age = CommandLine.arguments[2]
+    
+    print("Hello, \(name)! You are \(age) years old.")
+    ```
+  </Tab>
+  
+  <Tab title="AppleScript">
+    ```applescript
+    #!/usr/bin/osascript
+    
+    # @raycast.argument1 { "type": "text", "placeholder": "Name" }
+    # @raycast.argument2 { "type": "text", "placeholder": "Age" }
+    
+    on run argv
+      set name to item 1 of argv
+      set age to item 2 of argv
+      
+      log "Hello, " & name & "! You are " & age & " years old."
+    end run
+    ```
+  </Tab>
+</Tabs>
+
+## Examples
+
+### Text Arguments: Web Search
+
+```bash
+#!/bin/bash
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Search MDN
+# @raycast.mode silent
+
+# Optional parameters:
+# @raycast.icon 📚
+# @raycast.packageName Web Searches
+# @raycast.argument1 { "type": "text", "placeholder": "Topic (e.g., js, css)", "optional": true }
+# @raycast.argument2 { "type": "text", "placeholder": "Query", "percentEncoded": true }
+
+TOPIC=${1:-javascript}
+QUERY=$2
+
+open "https://developer.mozilla.org/search?topic=${TOPIC}&q=${QUERY}"
+```
+
+**Based on:** [script-command.template.js:19-20](https://github.com/raycast/script-commands/blob/master/templates/script-command.template.js#L19-L20)
+
+### Password Argument: Secure Configuration
+
+```bash
+#!/bin/bash
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Deploy to Production
+# @raycast.mode compact
+
+# Optional parameters:
+# @raycast.icon 🚀
+# @raycast.needsConfirmation true
+# @raycast.argument1 { "type": "password", "placeholder": "Deployment Token" }
+
+TOKEN=$1
+
+# Use token for deployment
+if deploy_app --token="$TOKEN"; then
+  echo "Deployment successful!"
+else
+  echo "Deployment failed"
+  exit 1
+fi
+```
+
+### Dropdown Argument: System Configuration
+
+```bash
+#!/bin/bash
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Set Dock Autohide
+# @raycast.mode silent
+
+# Optional parameters:
+# @raycast.icon 🤖
+# @raycast.packageName System
+# @raycast.argument1 { 
+#   "type": "dropdown", 
+#   "placeholder": "On/Off", 
+#   "data": [
+#     {"title": "Off", "value": "false"}, 
+#     {"title": "On", "value": "true"}
+#   ]
+# }
+
+defaults write com.apple.dock autohide -bool $1
+killall Dock
+```
+
+**Source:** [dock-set-autohide.sh](https://github.com/raycast/script-commands/blob/master/commands/system/dock-set-autohide.sh)
+
+### Multiple Arguments: Create Note
+
+```bash
+#!/bin/bash
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Add Note
+# @raycast.mode silent
+
+# Optional parameters:
+# @raycast.icon images/bear-light.png
+# @raycast.iconDark images/bear-dark.png
+# @raycast.packageName Bear
+# @raycast.argument1 { "type": "text", "placeholder": "Title", "percentEncoded": true }
+# @raycast.argument2 { "type": "text", "placeholder": "Content", "optional": true, "percentEncoded": true }
+# @raycast.argument3 { "type": "text", "placeholder": "Use Clipboard?", "optional": true, "percentEncoded": true }
+
+open "bear://x-callback-url/create?title=${1}&clipboard=${3}&text=${2}"
+
+echo "Note created!"
+```
+
+**Source:** [bear-add-note.sh:16-18](https://github.com/raycast/script-commands/blob/master/commands/apps/bear/bear-add-note.sh#L16-L18)
+
+### Dropdown with Multiple Options
+
+```bash
+#!/bin/bash
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Search BNF
+# @raycast.mode silent
+
+# Optional parameters:
+# @raycast.icon 💊
+# @raycast.packageName Medical
+# @raycast.argument1 { 
+#   "type": "dropdown", 
+#   "placeholder": "Source", 
+#   "data": [
+#     {"title": "BNF (Adults)", "value": "bnf"}, 
+#     {"title": "BNFC (Children)", "value": "bnfc"}
+#   ]
+# }
+# @raycast.argument2 { "type": "text", "placeholder": "Search term", "percentEncoded": true }
+
+SOURCE=$1
+TERM=$2
+
+open "https://bnf.nice.org.uk/${SOURCE}/search?q=${TERM}"
+```
+
+**Based on:** [bnf-search.sh](https://github.com/raycast/script-commands/blob/master/commands/web-searches/bnf-search.sh)
+
+## Best Practices
+
+<Steps>
+  <Step title="Use Descriptive Placeholders">
+    Clear placeholders help users understand what input is expected.
+    
+    ```bash
+    # Good
+    { "type": "text", "placeholder": "GitHub username" }
+    
+    # Avoid
+    { "type": "text", "placeholder": "Enter value" }
+    ```
+  </Step>
+  
+  <Step title="Enable Percent Encoding for URLs">
+    Always use `percentEncoded: true` when passing arguments to URLs.
+    
+    ```bash
+    { "type": "text", "placeholder": "Search query", "percentEncoded": true }
+    ```
+  </Step>
+  
+  <Step title="Mark Optional Fields">
+    Use `optional: true` for fields that have sensible defaults.
+    
+    ```bash
+    { "type": "text", "placeholder": "Port (default: 3000)", "optional": true }
+    ```
+  </Step>
+  
+  <Step title="Use Password Type for Secrets">
+    Protect sensitive data with the password type.
+    
+    ```bash
+    { "type": "password", "placeholder": "API Token" }
+    ```
+  </Step>
+  
+  <Step title="Provide Clear Dropdown Options">
+    Make dropdown titles user-friendly while keeping values script-friendly.
+    
+    ```bash
+    {
+      "type": "dropdown",
+      "data": [
+        {"title": "Development Server", "value": "dev"},
+        {"title": "Production Server", "value": "prod"}
+      ]
+    }
+    ```
+  </Step>
+</Steps>
+
+## Validation and Error Handling
+
+Always validate user input in your scripts:
+
+```bash
+#!/bin/bash
+
+# @raycast.argument1 { "type": "text", "placeholder": "Port number" }
+
+PORT=$1
+
+# Validate port number
+if ! [[ $PORT =~ ^[0-9]+$ ]]; then
+  echo "Error: Port must be a number"
+  exit 1
+fi
+
+if [ $PORT -lt 1 ] || [ $PORT -gt 65535 ]; then
+  echo "Error: Port must be between 1 and 65535"
+  exit 1
+fi
+
+echo "Starting server on port $PORT"
+```
+
+<Note>
+  For `inline` and `compact` modes, the last line of output becomes the error message when the script exits with a non-zero status code.
+</Note>
+
+## Migration from Deprecated Properties
+
+If you're using the deprecated `secure` property, update to the `password` type:
+
+```bash
+# Old (deprecated in 1.64.0)
+# @raycast.argument1 { "type": "text", "placeholder": "Password", "secure": true }
+
+# New
+# @raycast.argument1 { "type": "password", "placeholder": "Password" }
+```
+
+<CardGroup cols={2}>
+  <Card title="Output Modes" icon="display" href="/creating/output-modes">
+    Learn about different output presentation modes
+  </Card>
+  <Card title="Templates" icon="file-code" href="/creating/templates">
+    Start from ready-made templates
+  </Card>
+</CardGroup>

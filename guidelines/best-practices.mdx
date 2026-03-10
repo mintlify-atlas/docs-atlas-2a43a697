@@ -1,0 +1,447 @@
+---
+title: Best Practices
+description: Write maintainable, secure, and performant Script Commands
+icon: star
+---
+
+Follow these best practices to create high-quality Script Commands that are easy to maintain, secure, and performant.
+
+## Writing Maintainable Scripts
+
+### Choose the Right Language
+
+<Note>
+Most scripts should be written in **Bash or AppleScript** as these come pre-installed on macOS.
+</Note>
+
+Consider alternative runtimes only when:
+- The task requires features unavailable in Bash/AppleScript
+- The complexity justifies the additional dependency
+- The functionality provides significant value to users
+
+**Supported runtimes:**
+- Bash (recommended for system tasks)
+- AppleScript (recommended for app automation)
+- Swift (requires compilation)
+- Node.js (requires installation)
+- Python (usually pre-installed, but version may vary)
+
+### Use Proper File Naming
+
+Always use **lowercased, dash-case format** with appropriate extensions:
+
+```
+✅ weather-forecast.sh
+✅ spotify-play-pause.applescript
+✅ format-json.swift
+
+❌ weatherForecast.sh
+❌ Spotify_PlayPause.applescript
+❌ formatJSON.swift
+```
+
+### Structure Your Code Clearly
+
+<Steps>
+  <Step title="Start with metadata">
+    Place all Raycast metadata at the top of your script:
+    
+    ```bash
+    #!/bin/bash
+
+    # Required parameters:
+    # @raycast.schemaVersion 1
+    # @raycast.title My Command
+    # @raycast.mode compact
+
+    # Optional parameters:
+    # @raycast.icon 🚀
+    # @raycast.packageName Developer Utils
+    ```
+  </Step>
+  
+  <Step title="Document dependencies">
+    List any required tools or apps immediately after metadata:
+    
+    ```bash
+    # Dependency: Requires `jq` (https://stedolan.github.io/jq/)
+    # Install via homebrew: `brew install jq`
+    ```
+  </Step>
+  
+  <Step title="Add configuration instructions">
+    If your script needs configuration, explain it clearly:
+    
+    ```bash
+    # Configuration:
+    # Replace YOUR_API_KEY below with your actual API key
+    API_KEY="YOUR_API_KEY"
+    ```
+  </Step>
+  
+  <Step title="Write your logic">
+    Keep your code clean, commented, and easy to follow.
+  </Step>
+</Steps>
+
+## Dependency Management
+
+### Minimize Dependencies
+
+<Warning>
+Every dependency you add is a barrier to adoption. Non-technical users may not want to install tools just to run a simple script.
+</Warning>
+
+**Before adding a dependency, ask:**
+
+1. Can I achieve this with built-in Unix tools? (curl, awk, sed, grep, etc.)
+2. Is this a "deep" dependency (hides complex functionality) or "shallow" (minimal value)?
+3. What are the security implications?
+4. How many transitive dependencies will this pull in?
+
+### Examples: Built-in vs. Dependencies
+
+<AccordionGroup>
+  <Accordion title="JSON parsing - jq vs. built-in tools">
+    **With dependency (jq):**
+    ```bash
+    result=$(curl -s api.example.com | jq -r '.data.value')
+    ```
+    
+    **Without dependency (built-in):**
+    ```bash
+    result=$(curl -s api.example.com | grep -o '"value":"[^"]*' | cut -d'"' -f4)
+    ```
+    
+    For simple parsing, built-in tools work fine. For complex JSON manipulation, `jq` is justified.
+  </Accordion>
+  
+  <Accordion title="HTTP requests - specialized tools vs. curl">
+    **Avoid:** Installing a Node.js HTTP library for a simple GET request
+    
+    **Prefer:** Using curl which is pre-installed:
+    ```bash
+    curl -s -H "Authorization: Bearer $TOKEN" https://api.example.com/data
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Properly Declare Dependencies
+
+If a dependency is truly necessary:
+
+<Steps>
+  <Step title="Document it at the top">
+    ```bash
+    # Dependency: This script requires `imagemagick` installed
+    # Install via homebrew: `brew install imagemagick`
+    ```
+  </Step>
+  
+  <Step title="Check for availability">
+    ```bash
+    if ! command -v convert &> /dev/null; then
+        echo "ImageMagick is required (https://imagemagick.org)";
+        exit 1;
+    fi
+    ```
+  </Step>
+  
+  <Step title="Provide helpful error messages">
+    Include installation instructions in your error message so users know exactly what to do.
+  </Step>
+</Steps>
+
+## Performance Optimization
+
+### Choose the Right Output Mode
+
+The output mode affects how your script executes and displays results:
+
+<CardGroup cols={2}>
+  <Card title="silent" icon="volume-xmark">
+    **Best for:** Instant actions
+    
+    **Example:** Toggle system settings
+    
+    **Performance:** Fastest - closes immediately
+  </Card>
+  
+  <Card title="compact" icon="compress">
+    **Best for:** Long-running tasks
+    
+    **Example:** Network requests, file processing
+    
+    **Performance:** Shows progress, last line displayed
+  </Card>
+  
+  <Card title="fullOutput" icon="terminal">
+    **Best for:** Detailed output
+    
+    **Example:** Log viewing, data display
+    
+    **Performance:** Can handle any output size
+  </Card>
+  
+  <Card title="inline" icon="dashboard">
+    **Best for:** Dashboard widgets
+    
+    **Example:** Weather, system stats
+    
+    **Performance:** Runs on schedule (min 10s intervals)
+  </Card>
+</CardGroup>
+
+### Optimize Long-Running Tasks
+
+<Warning>
+**Important:** Long-running tasks that generate partial data don't work well in `compact`, `silent`, and `inline` modes.
+</Warning>
+
+**Example problem:**
+```bash
+# This generates lots of partial output
+zip -r archive.zip large-folder/
+```
+
+**Solution:**
+```bash
+# Use quiet flag for compact/silent/inline modes
+zip -qr archive.zip large-folder/
+```
+
+### Minimize External Calls
+
+Reduce the number of external process calls:
+
+```bash
+# ❌ Slow - multiple calls
+for file in *.txt; do
+    count=$(cat "$file" | wc -l)
+    echo "$file: $count"
+done
+
+# ✅ Fast - fewer external calls
+wc -l *.txt
+```
+
+## Security Considerations
+
+### Handling Sensitive Data
+
+<Warning>
+Never hardcode API keys, passwords, or tokens in scripts you plan to share.
+</Warning>
+
+**For templates requiring configuration:**
+
+<Steps>
+  <Step title="Use template naming">
+    Name your file with `.template.` (e.g., `api-call.template.sh`)
+  </Step>
+  
+  <Step title="Add placeholder variables">
+    ```bash
+    # Configuration required:
+    # Replace these values with your credentials
+    API_KEY="YOUR_API_KEY_HERE"
+    API_SECRET="YOUR_API_SECRET_HERE"
+    ```
+  </Step>
+  
+  <Step title="Document the setup">
+    ```bash
+    # Setup:
+    # 1. Copy this file and remove .template. from the filename
+    # 2. Replace YOUR_API_KEY_HERE with your actual API key
+    # 3. Save and run the script from Raycast
+    ```
+  </Step>
+</Steps>
+
+### Use Password Arguments for Secrets
+
+For scripts that accept sensitive input, use password-type arguments:
+
+```bash
+# @raycast.argument1 { "type": "password", "placeholder": "API Key" }
+
+# The input will be masked with asterisks
+API_KEY="$1"
+```
+
+### Input Validation
+
+Always validate user input to prevent injection attacks:
+
+```bash
+# ✅ Good - validates input
+if ! [[ $1 =~ ^[a-zA-Z0-9_-]+$ ]]; then
+    echo "Invalid input: only alphanumeric characters, dashes, and underscores allowed"
+    exit 1
+fi
+
+# ❌ Bad - no validation
+result=$(curl "https://api.example.com/search?q=$1")
+```
+
+### Quote Variables
+
+<Note>
+Always quote variables to prevent word splitting and glob expansion issues.
+</Note>
+
+```bash
+# ✅ Correct
+file_path="$1"
+if [ -f "$file_path" ]; then
+    cat "$file_path"
+fi
+
+# ❌ Dangerous
+file_path=$1
+if [ -f $file_path ]; then
+    cat $file_path
+fi
+```
+
+## Error Handling
+
+### Proper Exit Codes
+
+Raycast interprets non-zero exit codes as failures:
+
+```bash
+# Check for errors and exit appropriately
+if ! curl -s "$API_URL" > /tmp/response.json; then
+    echo "Failed to fetch data from API"
+    exit 1
+fi
+
+# Success
+echo "Operation completed successfully"
+exit 0
+```
+
+### User-Friendly Error Messages
+
+For `compact` and `inline` modes, the **last line** of output is shown as the error message:
+
+```bash
+if ! command -v jq &> /dev/null; then
+    echo "Error: jq is required. Install with: brew install jq"
+    exit 1
+fi
+```
+
+### Graceful Degradation
+
+```bash
+# Check for optional enhancements
+if command -v gdate &> /dev/null; then
+    # GNU date available (more features)
+    DATE_CMD="gdate"
+else
+    # Fall back to BSD date
+    DATE_CMD="date"
+fi
+
+timestamp=$($DATE_CMD +%s)
+```
+
+## Testing Your Scripts
+
+<Steps>
+  <Step title="Test locally first">
+    Run your script from the terminal before testing in Raycast:
+    ```bash
+    bash ./your-script.sh
+    ```
+  </Step>
+  
+  <Step title="Use ShellCheck">
+    For Bash scripts, run [ShellCheck](https://www.shellcheck.net/) to catch common issues:
+    ```bash
+    shellcheck your-script.sh
+    ```
+  </Step>
+  
+  <Step title="Test in Raycast">
+    Add your script directory to Raycast and test all scenarios:
+    - Normal execution
+    - Error conditions
+    - Edge cases (empty input, special characters, etc.)
+  </Step>
+  
+  <Step title="Test different modes">
+    If applicable, test your script with different output modes to ensure it works correctly.
+  </Step>
+</Steps>
+
+## Accessibility and User Experience
+
+### Choose Appropriate Icons
+
+Use clear, recognizable icons:
+
+```bash
+# @raycast.icon 🔍  # Search functionality
+# @raycast.icon 🎵  # Music controls
+# @raycast.icon ⚙️  # Settings/configuration
+# @raycast.icon 📊  # Statistics/data
+```
+
+<Note>
+You can also use image files (PNG/JPEG) or URLs for icons. Keep them small (recommended 64px).
+</Note>
+
+### Write Clear Titles
+
+Follow Apple's Human Interface Guidelines for title casing:
+
+```bash
+# ✅ Good titles
+# @raycast.title Toggle Dark Mode
+# @raycast.title Check GitHub Notifications
+# @raycast.title Format JSON from Clipboard
+
+# ❌ Poor titles
+# @raycast.title toggle dark mode
+# @raycast.title CHECK_GITHUB_NOTIFICATIONS
+# @raycast.title format-json-from-clipboard
+```
+
+### Use Descriptive Package Names
+
+```bash
+# ✅ Clear and descriptive
+# @raycast.packageName Developer Utils
+# @raycast.packageName Spotify Controls
+# @raycast.packageName GitHub Tools
+
+# ❌ Vague or generic
+# @raycast.packageName Utils
+# @raycast.packageName Scripts
+# @raycast.packageName Tools
+```
+
+## Code Quality Checklist
+
+Before submitting your Script Command:
+
+- [ ] Uses lowercased, dash-case naming
+- [ ] Includes all required metadata
+- [ ] Has clear, title-cased command name
+- [ ] Documents any dependencies with installation instructions
+- [ ] Checks for missing dependencies before execution
+- [ ] Uses appropriate output mode
+- [ ] Handles errors gracefully with helpful messages
+- [ ] Quotes all variables properly
+- [ ] Validates user input when applicable
+- [ ] Tested with ShellCheck (for Bash scripts)
+- [ ] Tested in Raycast successfully
+- [ ] Follows American English spelling
+- [ ] No hardcoded credentials or sensitive data
+- [ ] Uses built-in tools when possible
+- [ ] Includes helpful comments
+- [ ] Organized in appropriate directory structure

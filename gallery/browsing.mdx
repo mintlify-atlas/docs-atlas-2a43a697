@@ -1,0 +1,271 @@
+---
+title: Web Browsing Scripts
+description: Enhance your web browsing with URL utilities, tab management, and shortcuts
+---
+
+Enhance your web browsing experience with URL shorteners, tab management, website utilities, and browser automation scripts.
+
+## URL Management
+
+<CardGroup cols={2}>
+  <Card title="Shorten URL" icon="link" href="https://github.com/raycast/script-commands/blob/master/commands/browsing/shorten-url.sh">
+    Create short URLs using various URL shortening services.
+  </Card>
+  
+  <Card title="Shorten URL (Bitly)" icon="link-2" href="https://github.com/raycast/script-commands/blob/master/commands/browsing/shorten-url-bitly.template.sh">
+    Use Bitly to create branded short links with analytics.
+  </Card>
+  
+  <Card title="Shlink Create Short URL" icon="external-link" href="https://github.com/raycast/script-commands/blob/master/commands/browsing/shlink-create-short-url.template.sh">
+    Self-hosted URL shortening with Shlink.
+  </Card>
+  
+  <Card title="Short URL with Emoji" icon="smile" href="https://github.com/raycast/script-commands/blob/master/commands/browsing/short-url-emoji.sh">
+    Create fun emoji-based short URLs.
+  </Card>
+  
+  <Card title="Git.io Shortener" icon="github" href="https://github.com/raycast/script-commands/blob/master/commands/browsing/git-io.sh">
+    Shorten GitHub URLs with git.io.
+  </Card>
+</CardGroup>
+
+## Browser Controls
+
+<CardGroup cols={2}>
+  <Card title="New Browser Window" icon="window" href="https://github.com/raycast/script-commands/blob/master/commands/browsing/new-browser-window.sh">
+    Open a new browser window in your default browser.
+  </Card>
+  
+  <Card title="Chrome Current Page URL" icon="chrome" href="https://github.com/raycast/script-commands/blob/master/commands/browsing/chrome-current-page-url.sh">
+    Get the URL of the current Chrome tab.
+  </Card>
+  
+  <Card title="Safari Current Page URL" icon="compass" href="https://github.com/raycast/script-commands/blob/master/commands/browsing/safari-current-page-url.sh">
+    Get the URL of the current Safari tab.
+  </Card>
+  
+  <Card title="Safari Current Window URLs" icon="safari" href="https://github.com/raycast/script-commands/blob/master/commands/browsing/safari-current-window-urls.applescript">
+    Get all URLs from current Safari window tabs.
+  </Card>
+</CardGroup>
+
+## Privacy & Modes
+
+<CardGroup cols={2}>
+  <Card title="Open in Guest Profile" icon="user" href="https://github.com/raycast/script-commands/blob/master/commands/browsing/open-in-guest-profile.sh">
+    Open URLs in browser guest/incognito profile.
+  </Card>
+  
+  <Card title="To Private Browsing" icon="eye-off" href="https://github.com/raycast/script-commands/blob/master/commands/browsing/to-private-browsing.sh">
+    Open current page in private/incognito mode.
+  </Card>
+  
+  <Card title="Open Chrome without CORS" icon="globe" href="https://github.com/raycast/script-commands/blob/master/commands/browsing/open-chrome-without-cors.sh">
+    Launch Chrome with CORS disabled for development.
+  </Card>
+</CardGroup>
+
+## Website Utilities
+
+<CardGroup cols={2}>
+  <Card title="Website Screenshots" icon="camera" href="https://github.com/raycast/script-commands/blob/master/commands/browsing/website-screenshots.sh">
+    Capture full-page screenshots of websites.
+  </Card>
+  
+  <Card title="Peekalink" icon="eye" href="https://github.com/raycast/script-commands/blob/master/commands/browsing/peekalink.template.sh">
+    Preview link metadata and content before visiting.
+  </Card>
+  
+  <Card title="Open Multiple Websites" icon="layout-grid" href="https://github.com/raycast/script-commands/blob/master/commands/browsing/open-multiple-websites-on-safari.template.sh">
+    Open a set of websites at once in Safari.
+  </Card>
+</CardGroup>
+
+## Social Media
+
+<CardGroup cols={2}>
+  <Card title="Convert Twitter to Nitter" icon="twitter" href="https://github.com/raycast/script-commands/blob/master/commands/browsing/convert-twitter-to-nitter.js">
+    Convert Twitter URLs to privacy-friendly Nitter.
+  </Card>
+  
+  <Card title="YouTube Shorts in Player" icon="youtube" href="https://github.com/raycast/script-commands/blob/master/commands/browsing/Youtube%20Shorts%20in%20video%20player.sh">
+    Open YouTube Shorts in video player instead of browser.
+  </Card>
+</CardGroup>
+
+## Navigation Tools
+
+<CardGroup cols={2}>
+  <Card title="Go to Outline" icon="list" href="https://github.com/raycast/script-commands/blob/master/commands/browsing/go-to-outine.sh">
+    Jump to Outline.com version of current page to bypass paywalls.
+  </Card>
+</CardGroup>
+
+## Common Workflows
+
+### URL Shortening Workflow
+
+1. **Copy Long URL** - Get the URL you want to shorten
+2. **Run Shortener Script** - Choose your preferred service
+3. **Get Short Link** - Copied to clipboard automatically
+4. **Share** - Paste the clean, short URL
+
+### Tab Management
+
+1. **Get Current URLs** - Extract all open tab URLs
+2. **Save Sessions** - Store URL lists for later
+3. **Batch Open** - Open multiple sites at once
+4. **Tab Cleanup** - Close duplicate or unwanted tabs
+
+### Privacy Browsing
+
+1. **Guest Profile** - Test sites without cookies/history
+2. **Private Mode** - Browse without saving history
+3. **Clean Session** - No extensions or saved data
+4. **Anonymous Testing** - Check site behavior for new users
+
+### Screenshot Workflow
+
+1. **Enter URL** - Specify website to capture
+2. **Select Options** - Full page, viewport, or custom
+3. **Capture** - Script takes screenshot
+4. **Save/Share** - Image saved to specified location
+
+## URL Shortening Services
+
+### Bitly
+- **Features**: Analytics, custom domains, branded links
+- **Requirements**: Bitly account and API key
+- **Best for**: Professional use, tracking clicks
+
+### Shlink
+- **Features**: Self-hosted, full control, no data sharing
+- **Requirements**: Shlink server instance
+- **Best for**: Privacy-conscious users, custom deployment
+
+### Git.io
+- **Features**: GitHub-specific shortening
+- **Requirements**: None (for github.com URLs)
+- **Best for**: Sharing GitHub links
+
+### is.gd / v.gd
+- **Features**: Simple, no account needed
+- **Requirements**: None
+- **Best for**: Quick, anonymous shortening
+
+## Browser Automation Tips
+
+### Chrome Automation
+
+```bash
+# Get current URL
+chrome-current-page-url.sh
+
+# Open in guest mode
+open-in-guest-profile.sh <url>
+
+# Launch without CORS (dev mode)
+open-chrome-without-cors.sh
+```
+
+### Safari Automation
+
+```bash
+# Get current URL
+safari-current-page-url.sh
+
+# Get all tab URLs
+safari-current-window-urls.applescript
+
+# Open multiple sites
+open-multiple-websites-on-safari.sh
+```
+
+### Private Browsing
+
+```bash
+# Convert current tab to private
+to-private-browsing.sh
+
+# Open in guest profile
+open-in-guest-profile.sh
+```
+
+## Development Tools
+
+### CORS Bypass
+
+For local development:
+- Disable CORS in Chrome for API testing
+- Use separate browser profile
+- Never use for regular browsing (security risk)
+- Only for development purposes
+
+### Website Testing
+
+1. **Multiple Browsers** - Test in different profiles
+2. **Clean Slate** - Guest mode for accurate testing
+3. **Screenshots** - Document issues or designs
+4. **URL Management** - Track test URLs efficiently
+
+## Privacy & Security
+
+### Best Practices
+
+- **Private Mode** - Use for sensitive browsing
+- **Guest Profiles** - Test sites without affecting main profile
+- **URL Shorteners** - Be cautious with unknown short links
+- **Link Preview** - Use Peekalink to check before visiting
+- **Twitter Alternative** - Nitter provides privacy-friendly viewing
+
+### Privacy-Focused Tools
+
+- **Nitter** - Privacy-respecting Twitter frontend
+- **Outline.com** - Read articles without tracking
+- **Private Browsing** - No history or cookie storage
+- **Guest Mode** - Isolated browsing sessions
+
+## Integration Examples
+
+### Share Workflow
+
+1. **View Interesting Page** - Browse normally
+2. **Get URL** - Extract current page URL
+3. **Shorten** - Create short link
+4. **Share** - Send clean URL to others
+
+### Research Workflow
+
+1. **Collect URLs** - Gather links while browsing
+2. **Extract All Tabs** - Get all open tab URLs
+3. **Process** - Shorten, organize, or save
+4. **Share Collection** - Send curated list
+
+### Testing Workflow
+
+1. **Open in Guest** - Test fresh user experience
+2. **Take Screenshots** - Document findings
+3. **Switch Modes** - Test private vs. normal
+4. **Compare** - Check behavior differences
+
+## Requirements
+
+Depending on the scripts you use:
+
+### URL Shorteners
+- **Bitly**: Account + API key
+- **Shlink**: Self-hosted server instance
+- **Git.io**: None (automatic)
+
+### Browser Automation
+- **Chrome**: Google Chrome installed
+- **Safari**: macOS Safari (built-in)
+- **Firefox**: Mozilla Firefox (for Firefox-specific scripts)
+
+### Screenshot Tools
+- **Node.js**: For advanced screenshot scripts
+- **Puppeteer/Playwright**: Optional for full-page captures
+
+## View All Scripts
+
+Explore the complete browsing collection on [GitHub](https://github.com/raycast/script-commands/tree/master/commands/browsing) to view source code, installation instructions, and contribute your own web browsing utilities.

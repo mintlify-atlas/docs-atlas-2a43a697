@@ -1,0 +1,514 @@
+---
+title: "Templates"
+description: "Start with ready-made templates for different programming languages"
+---
+
+Raycast provides templates for popular programming languages to help you get started quickly. Each template includes the basic structure, required metadata, and language-specific examples.
+
+## Available Templates
+
+The [script-commands repository](https://github.com/raycast/script-commands/tree/master/templates) includes templates for:
+
+<CardGroup cols={2}>
+  <Card title="Bash" icon="terminal">
+    Shell scripting for system automation
+  </Card>
+  <Card title="Python" icon="python">
+    Python 3 scripts with package support
+  </Card>
+  <Card title="JavaScript" icon="js">
+    Node.js scripts with npm packages
+  </Card>
+  <Card title="Swift" icon="swift">
+    Native macOS scripting with Swift
+  </Card>
+  <Card title="Ruby" icon="gem">
+    Ruby scripts with gem support
+  </Card>
+  <Card title="PHP" icon="php">
+    PHP scripting for web tasks
+  </Card>
+  <Card title="AppleScript" icon="apple">
+    Native macOS automation
+  </Card>
+  <Card title="C#" icon="code">
+    .NET scripting for cross-platform tasks
+  </Card>
+</CardGroup>
+
+## Using Templates
+
+<Steps>
+  <Step title="Download Template">
+    Download the template file from the [templates directory](https://github.com/raycast/script-commands/tree/master/templates) or copy the content below.
+  </Step>
+  
+  <Step title="Remove .template Extension">
+    Rename the file to remove `.template.` from the filename:
+    
+    ```bash
+    # From:
+    script-command.template.sh
+    
+    # To:
+    my-script.sh
+    ```
+    
+    <Warning>
+      Scripts with `.template.` in the filename won't appear in Raycast.
+    </Warning>
+  </Step>
+  
+  <Step title="Customize Metadata">
+    Update the metadata parameters with your script's information:
+    - Change the title
+    - Set the appropriate mode
+    - Add your icon and package name
+    - Include your author information
+  </Step>
+  
+  <Step title="Write Your Logic">
+    Replace the placeholder code with your script logic.
+  </Step>
+  
+  <Step title="Make Executable">
+    Ensure the script is executable (Unix-based systems):
+    
+    ```bash
+    chmod +x my-script.sh
+    ```
+  </Step>
+</Steps>
+
+## Template Reference
+
+### Bash Template
+
+```bash
+#!/bin/bash
+
+# Raycast Script Command Template
+#
+# Duplicate this file and remove ".template" from the filename to get started.
+# See full documentation here: https://github.com/raycast/script-commands
+#
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title My First Script
+# @raycast.mode fullOutput
+# @raycast.packageName Raycast Scripts
+#
+# Optional parameters:
+# @raycast.icon 🤖
+# @raycast.currentDirectoryPath ~
+# @raycast.needsConfirmation false
+#
+# Documentation:
+# @raycast.description Write a nice and descriptive summary about your script command here 
+# @raycast.author Your name
+# @raycast.authorURL An URL for one of your social medias
+
+echo "Hello from My First Script"
+```
+
+**Source:** [script-command.template.sh](https://github.com/raycast/script-commands/blob/master/templates/script-command.template.sh)
+
+<Note>
+  Bash scripts are the most common and don't require additional dependencies. Use [ShellCheck](https://www.shellcheck.net/) to validate your scripts.
+</Note>
+
+### Python Template
+
+```python
+#!/usr/bin/env python3
+
+# Raycast Script Command Template
+#
+# Dependency: This script requires Python 3
+# Install Python 3: https://www.python.org/downloads/release
+#
+# Duplicate this file and remove ".template" from the filename to get started.
+# See full documentation here: https://github.com/raycast/script-commands
+#
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title My First Script
+# @raycast.mode fullOutput
+# @raycast.packageName Raycast Scripts
+#
+# Optional parameters:
+# @raycast.icon 🤖
+# @raycast.currentDirectoryPath ~
+# @raycast.needsConfirmation false
+#
+# Documentation:
+# @raycast.description Write a nice and descriptive summary about your script command here 
+# @raycast.author Your name
+# @raycast.authorURL An URL for one of your social medias
+
+print("Hello World!")
+```
+
+**Source:** [script-command.template.py](https://github.com/raycast/script-commands/blob/master/templates/script-command.template.py)
+
+### JavaScript (Node.js) Template
+
+```javascript
+#!/usr/bin/env node
+
+// Raycast Script Command Template
+//
+// Dependency: This script requires Nodejs.
+// Install Node: https://nodejs.org/en/download/
+//
+// Duplicate this file and remove ".template" from the filename to get started.
+// See full documentation here: https://github.com/raycast/script-commands
+//
+// Required parameters:
+// @raycast.schemaVersion 1
+// @raycast.title My First Script
+// @raycast.mode fullOutput
+// @raycast.packageName Raycast Scripts
+//
+// Optional parameters:
+// @raycast.icon 🤖
+// @raycast.argument1 { "type": "text", "placeholder": "js, css, html", "optional": true}
+// @raycast.argument2 { "type": "text", "placeholder": "query" }
+//
+// Documentation:
+// @raycast.description Write a nice and descriptive summary about your script command here 
+// @raycast.author Your name
+// @raycast.authorURL An URL for one of your social medias
+
+/*
+	ABOUT THIS TEMPLATE:
+	
+	This template is meant to be a quick starting point for creating a script command using Nodejs.
+	
+	This template demonstrates the following ideas:
+	
+	* Extracting passed arguments.
+	* Using both required and optional arguments
+	* URI Encoding
+	* Outputting result to Raycast
+	* Opening a url using exec and the unix open command
+	* Use of destructuring
+	* Use of template literals
+
+*/
+
+const { exec } = require('child_process')
+
+// Use destructuring to grab arguments.
+// Use slice to start from position 3.
+let [topic, query] = process.argv.slice(2)
+let uri = `https://developer.mozilla.org/search?topic=${topic}&q=${encodeURIComponent(query)}`
+
+// console.log() displays output in fullOutput mode.
+console.log(`The arguments are: \n   ${process.argv.join('\n   ')}\n`)
+console.log(`Your topic is "${topic}"`)
+console.log(`Your query is "${query}"`)
+console.log(`Your query uri encoded is "${encodeURIComponent(query)}"`)
+console.log(`The uri is "${uri}"`)
+
+// Uncomment the exec line below to open this query in your web browser.
+// Use double quotes around the uri to avoid processing issues.
+//exec(`open "${uri}"`)
+```
+
+**Source:** [script-command.template.js](https://github.com/raycast/script-commands/blob/master/templates/script-command.template.js)
+
+<Note>
+  The JavaScript template includes detailed comments demonstrating argument handling, URI encoding, and browser integration.
+</Note>
+
+### Swift Template
+
+```swift
+#!/usr/bin/swift
+
+// Raycast Script Command Template
+// 
+// Duplicate this file and remove ".template" from the filename to get started.
+// See full documentation here: https://github.com/raycast/script-commands
+//
+// Required parameters:
+// @raycast.schemaVersion 1
+// @raycast.title My First Script
+// @raycast.mode fullOutput
+// @raycast.packageName Raycast Scripts
+//
+// Optional parameters:
+// @raycast.icon 🤖
+// @raycast.currentDirectoryPath ~
+// @raycast.needsConfirmation false
+//
+// Documentation:
+// @raycast.description Write a nice and descriptive summary about your script command here
+// @raycast.author Your name
+// @raycast.authorURL An URL for one of your social medias
+
+print("Hello from My First Script")
+```
+
+**Source:** [script-command.template.swift](https://github.com/raycast/script-commands/blob/master/templates/script-command.template.swift)
+
+### Ruby Template
+
+```ruby
+#!/usr/bin/env ruby
+
+# Raycast Script Command Template
+#
+# Dependency: This script requires Ruby
+# Install Ruby: http://www.ruby-lang.org/
+#
+# Duplicate this file and remove ".template" from the filename to get started.
+# See full documentation here: https://github.com/raycast/script-commands
+#
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title My First Script
+# @raycast.mode fullOutput
+# @raycast.packageName Raycast Scripts
+#
+# Optional parameters:
+# @raycast.icon 🤖
+# @raycast.currentDirectoryPath ~
+# @raycast.needsConfirmation false
+# @raycast.argument1 { "type": "text", "placeholder": "Placeholder text" }
+#
+# Documentation:
+# @raycast.description Write a nice and descriptive summary about your script command here 
+# @raycast.author Your name
+# @raycast.authorURL An URL for one of your social medias
+
+# If accepting an argument:
+# arg1 = ARGV[0]
+
+puts "Hello World!"
+```
+
+**Source:** [script-command.template.rb](https://github.com/raycast/script-commands/blob/master/templates/script-command.template.rb)
+
+### PHP Template
+
+```php
+#!/usr/bin/env php
+
+# Raycast Script Command Template
+#
+# Dependency: This script requires PHP
+# Install PHP: http://www.https://www.php.net/
+#
+# Duplicate this file and remove ".template" from the filename to get started.
+# See full documentation here: https://github.com/raycast/script-commands
+#
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title My First Script
+# @raycast.mode fullOutput
+# @raycast.packageName Raycast Scripts
+#
+# Optional parameters:
+# @raycast.icon 🤖
+# @raycast.currentDirectoryPath ~
+# @raycast.needsConfirmation false
+#
+# Documentation:
+# @raycast.description Write a nice and descriptive summary about your script command here 
+# @raycast.author Your name
+# @raycast.authorURL An URL for one of your social medias
+
+<?php
+
+print("Hello World!");
+```
+
+**Source:** [script-command.template.php](https://github.com/raycast/script-commands/blob/master/templates/script-command.template.php)
+
+### AppleScript Template
+
+```applescript
+#!/usr/bin/osascript
+
+# Raycast Script Command Template
+#
+# Duplicate this file and remove ".template" from the filename to get started.
+# See full documentation here: https://github.com/raycast/script-commands
+#
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title My First Script
+# @raycast.mode fullOutput
+# @raycast.packageName Raycast Scripts
+#
+# Optional parameters:
+# @raycast.icon 🤖
+# @raycast.currentDirectoryPath ~
+# @raycast.needsConfirmation false
+# @raycast.argument1 { "type": "text", "placeholder": "Arg1" }
+#
+# Documentation:
+# @raycast.description Write a nice and descriptive summary about your script command here 
+# @raycast.author Your name
+# @raycast.authorURL An URL for one of your social medias
+
+on run argv
+  log "Hello from My First Script: " & ( item 1 of argv )
+end run
+```
+
+**Source:** [script-command.template.applescript](https://github.com/raycast/script-commands/blob/master/templates/script-command.template.applescript)
+
+<Note>
+  AppleScript is perfect for automating macOS applications and system tasks. Access arguments via the `argv` parameter in the `run` handler.
+</Note>
+
+### C# (.NET) Template
+
+```csharp
+#!/usr/bin/env dotnet
+
+// Raycast Script Command Template
+//
+// Dependency: This script requires .NET 10
+// Install .NET: https://dotnet.microsoft.com/
+//
+// Duplicate this file and remove ".template" from the filename to get started.
+// See full documentation here: https://github.com/raycast/script-commands
+//
+// Required parameters:
+// @raycast.schemaVersion 1
+// @raycast.title My First Script
+// @raycast.mode fullOutput
+// @raycast.packageName Raycast Scripts
+//
+// Optional parameters:
+// @raycast.icon 🤖
+// @raycast.currentDirectoryPath ~
+// @raycast.needsConfirmation false
+//
+// Documentation:
+// @raycast.description Write a nice and descriptive summary about your script command here
+// @raycast.author Your name
+// @raycast.authorURL An URL for one of your social medias
+
+Console.WriteLine("Hello World!");
+```
+
+**Source:** [script-command.template.cs](https://github.com/raycast/script-commands/blob/master/templates/script-command.template.cs)
+
+## Choosing a Language
+
+Select your language based on your needs:
+
+| Language | Best For | Dependencies |
+|----------|----------|-------------|
+| **Bash** | System automation, file operations, simple tasks | None (built-in) |
+| **Python** | Data processing, API calls, complex logic | Python 3 |
+| **JavaScript** | Web APIs, JSON processing, npm packages | Node.js |
+| **Swift** | Native macOS features, performance-critical tasks | Xcode Command Line Tools |
+| **Ruby** | Text processing, web scraping, automation | Ruby |
+| **PHP** | Web tasks, API integration | PHP |
+| **AppleScript** | macOS app automation, UI scripting | None (built-in) |
+| **C#** | Cross-platform tasks, .NET libraries | .NET SDK |
+
+## Template Best Practices
+
+<Steps>
+  <Step title="Start with Required Metadata">
+    Always include the three required parameters: `schemaVersion`, `title`, and `mode`.
+  </Step>
+  
+  <Step title="Add Dependencies in Comments">
+    Document any external dependencies at the top of your script:
+    
+    ```bash
+    # Dependency: requires jq (https://stedolan.github.io/jq/)
+    # Install via Homebrew: `brew install jq`
+    ```
+  </Step>
+  
+  <Step title="Use Appropriate Mode">
+    Choose the output mode that matches your script's purpose:
+    - `fullOutput` for detailed information
+    - `compact` for status messages
+    - `silent` for background tasks
+    - `inline` for live dashboards
+  </Step>
+  
+  <Step title="Include Documentation">
+    Add description, author, and authorURL for better discoverability.
+  </Step>
+  
+  <Step title="Test Thoroughly">
+    Run your script multiple times with different inputs before sharing.
+  </Step>
+</Steps>
+
+## Quick Template Commands
+
+Download all templates at once:
+
+```bash
+# Clone the repository
+git clone https://github.com/raycast/script-commands.git
+
+# Navigate to templates
+cd script-commands/templates
+
+# Copy a template
+cp script-command.template.sh ~/my-scripts/my-script.sh
+
+# Make it executable
+chmod +x ~/my-scripts/my-script.sh
+```
+
+Or download individual templates:
+
+```bash
+# Bash
+curl -O https://raw.githubusercontent.com/raycast/script-commands/master/templates/script-command.template.sh
+
+# Python
+curl -O https://raw.githubusercontent.com/raycast/script-commands/master/templates/script-command.template.py
+
+# JavaScript
+curl -O https://raw.githubusercontent.com/raycast/script-commands/master/templates/script-command.template.js
+```
+
+## Community Examples
+
+Browse real-world examples in the [commands directory](https://github.com/raycast/script-commands/tree/master/commands) organized by category:
+
+- **Apps**: Integration with third-party applications
+- **Browsing**: Web searches and URL handlers
+- **Communication**: Slack, email, messaging
+- **Conversions**: Data format conversions
+- **Developer Utils**: Git, Docker, development tools
+- **Media**: Music, video, image processing
+- **Navigation**: File and folder shortcuts
+- **System**: macOS system configuration
+- **Web Searches**: Quick search commands
+
+<Note>
+  When copying community scripts, check the comments at the top for any required dependencies or configuration steps.
+</Note>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Script Basics" icon="play" href="/creating/basics">
+    Learn the fundamentals of Script Commands
+  </Card>
+  <Card title="Metadata Reference" icon="gear" href="/creating/metadata">
+    Explore all metadata parameters
+  </Card>
+  <Card title="Output Modes" icon="display" href="/creating/output-modes">
+    Understand different output presentation modes
+  </Card>
+  <Card title="Arguments" icon="input-text" href="/creating/arguments">
+    Add custom input fields to your scripts
+  </Card>
+</CardGroup>
